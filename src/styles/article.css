@@ -62,6 +62,9 @@
   background: #fff;
 }
 /* Markdown renders an image and its emphasized caption as two adjacent paragraphs. */
+.post-prose > p > img {
+  margin-block: 0;
+}
 .post-prose > p:has(> img):has(+ p > em:only-child) {
   margin-bottom: 0.65rem;
 }
