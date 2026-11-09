@@ -46,6 +46,17 @@
 
 完整證據與限制見 [UI_LAYOUT_REVIEW.md](UI_LAYOUT_REVIEW.md)，維護設定見 [SETUP.md](SETUP.md) 的 3.1 節。手機結果來自本機 Chrome 的指定尺寸檢視，不等同實體手機或完整無障礙稽核。
 
+### 後續：文章對齊與圖說複核
+
+使用者進一步指出，表格雖然變寬，正文、圖片與表格各自置中仍造成三條不同的左邊界。本輪由獨立 UI/UX review agent 檢視新截圖，再將文章內部區塊統一到主欄左緣，保留正文與圖表各自需要的寬度，並修正 Markdown 圖說的選擇器、字體與間距。
+
+- 對齊修正 commit：[`9c2ef4d`](https://github.com/bradcocox/brad-log/commit/9c2ef4d34089fff4e6b7a2e0f6ad18d323152c39)。圖說間距修正 commit：[`36551cf`](https://github.com/bradcocox/brad-log/commit/36551cf00bc6e0773b1fb691d1f4b5e55ca6cd32)。
+- [最終 CSS 部署 run 42577282888](https://github.com/bradcocox/brad-log/actions/runs/42577282888) 成功。
+- 1868px、1024px 與 390px 寬度下，文章直接內容區塊與主欄左緣的最大差異均為 0px，右緣沒有超出主欄，也沒有整頁水平溢位。手機預設逐項閱讀持續正常。
+- 獨立 reviewer 另行檢視修正後的「表格接正文與程式碼」及「標題接圖片與圖說」，確認本輪兩項錯位問題已解決；文章頂端由實作端另外檢查。
+
+本輪新證據、設定與驗證界線見 [ARTICLE_ALIGNMENT_REVIEW.md](ARTICLE_ALIGNMENT_REVIEW.md)。這次 CSS 對齊複核不延伸為全站功能或完整無障礙重新驗證。
+
 ## 內容與建置
 
 - 第一篇為初學者教學，已補入七張圖：四張說明圖、Pages Source 設定實拍、Actions 成功實拍、正式首頁實拍。

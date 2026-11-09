@@ -1,5 +1,7 @@
 # Brad.log 文章閱讀版面與表格檢視紀錄
 
+本文件保留前一輪「表格可讀性」修正的版本與量測。後續針對正文、圖片、表格左側不一致的檢視與修正，請見 [文章對齊與圖說檢視紀錄](ARTICLE_ALIGNMENT_REVIEW.md)；目前的對齊規則以該紀錄及 [SETUP.md](SETUP.md) 為準。
+
 **狀態：本次已執行範圍的檢視與回歸驗證完成。**
 
 記錄日期：2026-11-09。檢視對象為 [Brad.log](https://bradcocox.github.io/brad-log/) 的首篇教學〈從零開始：用 AstroPaper 與 GitHub Pages 架設技術部落格〉，尤其是「設定總表：下次要改東西，從哪裡找？」的五欄資料表。文章來源為 [`src/content/posts/github-pages-astropaper-guide.md`](../src/content/posts/github-pages-astropaper-guide.md)。

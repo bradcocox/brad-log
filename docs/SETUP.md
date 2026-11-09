@@ -88,18 +88,32 @@ draft: false
 
 ### 3.1 文章閱讀版面與表格
 
-這次調整回應「文章過窄、設定表難以閱讀」的實際回饋：文章頁容器、一般段落、圖片／程式碼與資料表分別管理寬度，寬螢幕的目錄使用獨立欄位。以下 px 換算以根字體 16px 為基準；實際 `rem` 尺寸仍會跟隨瀏覽器字體設定。
+閱讀版面先回應「文章過窄、設定表難以閱讀」，再依後續的左側不齊回饋調整對齊。文章頁容器、一般段落、圖片／程式碼與資料表分別管理寬度，內部區塊共用 `.post-primary` 的左線，寬螢幕的目錄使用獨立欄位。以下 px 換算以根字體 16px 為基準；實際 `rem` 尺寸仍會跟隨瀏覽器字體設定。
 
 | 設定位置 | 設定 | 用途與維護注意 |
 | --- | --- | --- |
 | `src/styles/article.css` 的 `.post-page` | `width: 100%`、`max-width: 100rem`，即上限 1600px，含左右 padding | 擴大文章頁可用空間；不可把這個上限直接套在每段正文 |
 | 同上 | `padding-inline: clamp(1.25rem, 3vw, 3rem)` | 左右留白依畫面變化，每側介於 20px 與 48px |
-| `.post-page`、`.post-header`、`.post-end`、一般正文 | `--reading-width: 54rem`，即 864px | 標題資訊、一般段落與文章尾端維持閱讀寬度，並在可用範圍內置中 |
-| `.post-prose` 下的 `pre`、`figure`、`.expressive-code`、`.code-block` 與含圖片的段落 | `max-width: 68rem`，即 1088px | 提供圖解與長程式碼較寬的空間；程式碼複製按鈕的包裹元素使用 `.code-block`，避免被一般段落的 54rem 限制 |
+| `.post-page`、`.post-header`、`.post-end`、一般正文 | `--reading-width: 54rem`，即 864px | 標題資訊、一般段落與文章尾端維持閱讀寬度，從 `.post-primary` 的共同左線開始 |
+| `.post-header, .article-back, .post-end` 與 `.post-prose > :not(.article-table)` | `margin-inline: 0 auto` | 標題、摘要、meta、返回入口與正文外框統一左側起點；保留清單與引用的合理內距 |
+| `.post-prose` 下的 `pre`、`figure`、`.expressive-code`、`.code-block` 與含圖片的段落 | `max-width: 68rem`，即 1088px | 從共同左線向右提供較寬空間，右端仍受主欄限制；程式碼複製按鈕的包裹元素使用 `.code-block`，避免被一般段落的 54rem 限制 |
 | `src/pages/posts/[...slug]/index.astro` | `.post-page` → `.post-body` → `.post-primary` | 文章頁的結構入口；表格不受一般段落的 54rem 限制 |
 | `src/pages/posts/[...slug]/_components/PostToc.astro` | `@media (min-width: 90rem)`，約 1440px；有側邊目錄時使用 `grid-template-columns: minmax(0, 1fr) 15rem`，`gap: 2.5rem` | 主內容可收縮，目錄保留 240px，兩欄間隔 40px，避免表格與目錄重疊 |
 | 同上與 `_components/BackToTopButton.astro` | 小於 90rem 時隱藏側邊目錄，使用浮動目錄入口 | 中小螢幕把空間留給正文；修改斷點時須同步兩個元件 |
 | `src/layouts/Layout.astro` | 匯入 `src/styles/article.css` | 閱讀版面樣式入口；列印時取消頁面最大寬度與側邊目錄配置 |
+
+頁面外層 `.post-page` 仍以 `margin-inline: auto` 在 viewport 中置中；內部閱讀區塊才採共同左線。正文保留 864px，圖碼保留 1088px，表格可使用主欄全寬；本輪 1868px 桌機 viewport 的主欄基準為 1224px。這些寬度分工避免把表格重新壓窄，也避免一般文字行長過長。
+
+**圖片與圖說維護：** 本篇 Markdown 圖片為一個 `p > img`，後方圖說是另一個只有 `em` 子元素的段落。圖說請沿用「圖片段落後接獨立的強調文字段落」格式；若改成 `figure/figcaption` 或其他結構，必須同步調整樣式選擇器。
+
+| `src/styles/article.css` 中的位置 | 設定與原因 |
+| --- | --- |
+| `.post-prose > p > img` | `margin-block: 0`，移除 typography 圖片預設的垂直外距，避免原本 32px 外距干擾圖說成組間距 |
+| `.post-prose > p:has(> img):has(+ p > em:only-child)` | 圖片段落下方 `margin-bottom: 0.65rem`，只套用於緊接圖說的圖片 |
+| `.post-prose > p:has(> img) + p:has(> em:only-child)` | 圖說最大 68rem，與圖片共用左線；`margin-top: 0`、字級 `0.94rem`（15.04px）、行高 `1.7`、字色 `var(--muted-foreground)` |
+| 上述圖說段落的 `> em` | `font-style: normal`，保留圖說 Markdown 結構但使用正體閱讀 |
+
+原本 `img + em` 不會命中兩個相鄰段落中的圖說，不應再次以此作為本篇圖說的樣式入口。共同左線與圖說修正已完成獨立設計判斷、正式部署及本輪現場驗證，完整設定、前後截圖與驗證範圍見 [文章對齊與視覺組織檢視](ARTICLE_ALIGNMENT_REVIEW.md)。
 
 表格的內容仍只在 Markdown 寫一次。建置時由 `src/utils/rehypeTableWrapper.js` 從同一份語法樹生成原生 `<table>` 與逐項閱讀卡片；`src/components/ArticleTables.astro` 負責閱讀方式切換與水平捲動互動，樣式集中在 `src/styles/article-tables.css`。文章頁在正文後載入 `ArticleTables`，不需要逐篇加入額外元件。
 
@@ -127,7 +141,9 @@ draft: false
 
 **無 JavaScript 的預設閱讀方式：** 原生表格與卡片都在建置階段產生，CSS 本身就會依 767px 斷點顯示對應模式；沒有 JavaScript 時仍能閱讀內容，切換與左右捲動按鈕預設隱藏。複雜表格維持可水平捲動的原生表格，不強行轉成卡片。
 
-本次已在正式站完成 1868px、1440px、1024px 與 390px 寬度的檢視；實際量測、修正前後截圖、互動結果與未測範圍見 [文章閱讀版面與表格檢視紀錄](UI_LAYOUT_REVIEW.md)。桌機設定總表的可見容器由 720px 增為 1224px，「用途」欄由約 31px 增為 171px；手機預設逐項閱讀。
+前一輪表格修正已在正式站完成 1868px、1440px、1024px 與 390px 寬度的檢視；該版本的量測、修正前後截圖、互動結果與未測範圍保留在 [文章閱讀版面與表格檢視紀錄](UI_LAYOUT_REVIEW.md)。桌機設定總表的可見容器由 720px 增為 1224px，「用途」欄由約 31px 增為 171px；手機預設逐項閱讀。
+
+後續對齊修正的最後版本為 [`36551cf00bc6e0773b1fb691d1f4b5e55ca6cd32`](https://github.com/bradcocox/brad-log/commit/36551cf00bc6e0773b1fb691d1f4b5e55ca6cd32)，[正式 CI 與部署 42577282888](https://github.com/bradcocox/brad-log/actions/runs/42577282888) 成功。已在 1868 × 959、1024 × 900、390 × 844 檢查共同左線；可見文章直接區塊的最大左差、最大右側超出量與整頁水平溢位均為 0px。桌機仍保留 864px 正文、1088px 圖碼／圖說與 1224px 表格；流程圖圖說的實測間距為 10.390625px。這次的現場與獨立設計複核詳見 [文章對齊與視覺組織檢視](ARTICLE_ALIGNMENT_REVIEW.md)，與前一輪寬度及功能報告分開保存。
 
 後續新增或修改表格時，除了建置通過，也要實際開啟正式輸出，檢查每欄可讀性、長路徑換行、目錄位置與手機完整欄位。修改斷點或表格互動時，再核對切換、鍵盤捲動與明暗主題；無 JavaScript 的 UI、實體手機及其他瀏覽器需另行驗證，不把本次 Chrome 檢視當成全面通過。
 
