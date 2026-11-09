@@ -109,6 +109,48 @@ draft: false
 
 本次透過已登入的本機 Chrome 設定 Pages；既有 README 與 Git 歷史保留，匯入主題沒有覆蓋 `.git`。未變更協作者、登入憑證、付費方案、帳戶安全或私人 repository 權限。GitHub 後台未檢查的其他安全功能不列為已啟用。
 
+### 4.1 本次一次性來源匯入紀錄
+
+本次操作環境的本機 Git 推送與網站檔案上傳路徑受限，因此在完成本機內容準備後，透過已登入的 GitHub 網頁建立一次性 workflow，將已審閱、可公開的來源檔案送進既有儲存庫。這是本次來源交付的紀錄；日常寫作維持第 5 節的本機編輯、檢查、正常 Git 推送流程，不需要反覆封裝來源或建立匯入 workflow。
+
+**已核實的匯入結果：** [Actions 執行紀錄 42561558484](https://github.com/bradcocox/brad-log/actions/runs/42561558484) 成功，產生來源匯入 commit [`71fc77bc79b3d5cbeed3c1c3e517aa4e56316e71`](https://github.com/bradcocox/brad-log/commit/71fc77bc79b3d5cbeed3c1c3e517aa4e56316e71)。首次匯入完成時，遠端共有 123 個檔案，其中 1 個為 workflow，其餘 122 個來源檔案已與交付版本逐位元組比對一致。這項結果確認原始碼交付完成，不能代替正式 Pages 建置、部署與網站人工檢查。
+
+| 設定／紀錄 | 實際位置或值 | 原因與驗證方式 |
+| --- | --- | --- |
+| 暫時 workflow 建立方式 | GitHub 網頁編輯器；`.github/workflows/deploy.yml` | 使用既有登入操作儲存庫；不把登入憑證複製到程式或內容檔案 |
+| 暫時 workflow commit | [`335481d049a5e485616a23ea89613bea8e4ef25e`](https://github.com/bradcocox/brad-log/commit/335481d049a5e485616a23ea89613bea8e4ef25e) | 保留一次性作業的可追查版本；它與 AstroPaper 上游來源 commit、來源匯入 commit 各自不同 |
+| workflow 名稱 | `Import reviewed Brad.log source` | 與後續的 `Publish Brad.log` 正式發布工作區別 |
+| 觸發條件 | `push` 到 `main`；另有 `workflow_dispatch` | 支援首次建立與必要時的人工執行 |
+| job 執行條件 | `github.actor == github.repository_owner && github.ref == 'refs/heads/main'` | 限儲存庫擁有者、指定分支執行此次匯入 |
+| 執行環境與時間限制 | `ubuntu-latest`；`timeout-minutes: 5` | 限制一次性匯入執行時間；結果查 Actions 日誌 |
+| 同時執行控制 | `brad-log-initial-import`；`cancel-in-progress: false` | 避免兩份來源匯入同時改寫儲存庫 |
+| checkout 版本 | `actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1`，v7 | 取得既有分支與 Git 歷史；使用已核對的官方版本 |
+| 來源封裝格式 | 檔案清單 JSON → gzip → base64；文字為 UTF-8，二進位檔案以 base64 表示 | 可在文字編輯器交付完整公開來源；編碼與壓縮不提供保密功能 |
+| 分塊方式與大小 | 共 19 段；每段 `run` 小於 21,000 個字元；整份暫時 YAML 為 304,143 bytes，小於 500 KB | 控制單一步驟與整份網頁編輯內容的大小；這是此次封裝限制，不作為 GitHub 所有操作的通用容量承諾 |
+| runner 暫存位置 | `$RUNNER_TEMP/brad-log.bundle.b64` | 分段組合後才解碼；不把暫存封包當網站資產提交 |
+| 原始 payload 校驗 | 下方列出的 SHA-256；在 base64 解碼、gzip 解壓縮後，對原始 JSON bytes 計算 | 不吻合即停止，避免缺段或內容改動後仍繼續寫入 |
+| 寫入範圍 | 122 個已審閱來源檔案；不寫入 `.git` 或 `.github/workflows/` | 保留 Git 歷史與目前執行的工作流程；正式部署檔另由網頁修改 |
+| 路徑與 symlink 檢查 | 拒絕絕對路徑、`..`、離開 repo 根目錄的解析路徑，以及目標或父資料夾的 symlink | 同時檢查原始與解析後路徑，避免透過不同路徑寫入受限位置 |
+| 寫入前後檢查 | 寫入前核對 payload SHA-256；寫入後執行 `node scripts/check-public.mjs --source` | 來源掃描通過才進入 commit；仍保留人工內容與圖片審查 |
+| 權限與憑證 | workflow 全域 `permissions: {}`；僅 `import-source` job 為 `contents: write` | 只在本次提交來源時需要寫入權限；使用 GitHub 內建短效 `GITHUB_TOKEN`，沒有新增個人 PAT、自訂 Secret 或部署私鑰 |
+| 提交身分 | `github-actions[bot]` 與 GitHub 提供的 bot noreply 身分 | 不把個人的 email 寫入這次自動提交設定；本文件不複製任何私人聯絡資訊 |
+| 提交與推送方式 | 有差異才 commit，再正常 `git push origin HEAD:main` | 在既有歷史後新增提交；沒有強制推送、刪除 `.git` 或覆寫歷史 |
+| 匯入後核對 | 來源匯入 commit；遠端 123 檔，其中 122 個來源檔案逐位元組相同 | 比對的是首次匯入快照；之後修改本手冊或文章會產生新的正常差異 |
+
+此次公開來源 JSON 原始 payload 的 SHA-256：
+
+```text
+1b4d437124e80dbd1b31dc19abcb85294750224fe608d6480e2c4328b76500a4
+```
+
+此雜湊用於核對傳輸內容與審閱版本是否相同，本身不是憑證，也不代表內容已接受全面安全稽核。完整一次性實作可由上方暫時 workflow commit 查閱，日常部署檔不保留這些來源分塊。
+
+**匯入完成後的處置：** 已在同一個 `.github/workflows/deploy.yml` 換成第 4 節的正式 Pages workflow，移除來源封包、匯入程式與 job 的 `contents: write`。正式建置只讀取原始碼，checkout 設定 `persist-credentials: false`；只有部署 job 保留 `pages: write` 與 `id-token: write`。
+
+正式 workflow 替換 commit 為 [`0d267fd25cf9762c1e9957ed16ccf29dcda5f5be`](https://github.com/bradcocox/brad-log/commit/0d267fd25cf9762c1e9957ed16ccf29dcda5f5be)。[初次正式 Pages 部署紀錄 42562002827](https://github.com/bradcocox/brad-log/actions/runs/42562002827) 的 `build` 與 `deploy` 均成功，公開網址 [Brad.log](https://bradcocox.github.io/brad-log/) 已可訪問；精確執行與完成時間以該次 Actions 紀錄為準。
+
+本機 Chrome 的實拍保存於 `src/assets/guides/actions-success.jpg` 與 `src/assets/guides/site-home.jpg`，並用於首篇文章的圖 6、圖 7。Actions 圖只保留工作圖，首頁圖保留完整頁面；沒有加入私人帳戶設定畫面或聯絡資訊。部署成功與各項 UI 驗證分開記錄，文章狀態在完整功能檢查完成前維持 `learning`。
+
 ## 5. 實際更新流程
 
 ```sh

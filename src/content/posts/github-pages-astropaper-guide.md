@@ -2,12 +2,13 @@
 title: 從零開始：用 AstroPaper 與 GitHub Pages 架設技術部落格
 author: Brad
 pubDatetime: 2026-11-09T11:00:00+08:00
+modDatetime: 2026-11-09T12:35:00+08:00
 featured: true
 draft: false
 category: devops-cloud
 contentType: tutorial
 level: beginner
-status: learning
+status: verified
 tags:
   - github-pages
   - astropaper
@@ -20,7 +21,7 @@ description: 從看懂 GitHub、AstroPaper 與 GitHub Pages 的分工開始，�
 
 這篇記錄 Brad.log 採用的組合：**用 Markdown 寫文章、AstroPaper 提供版型、Astro 建置網站，再由 GitHub Actions 發布到 GitHub Pages**。後續新增筆記，就沿用同一條發布流程。
 
-本文以第一次架站的讀者為對象。範例帳號統一寫成 `YOUR_GITHUB_USERNAME`，範例儲存庫叫 `your-blog`；操作前請換成自己的資料。本文使用的原始碼在 [bradcocox/brad-log](https://github.com/bradcocox/brad-log)，完成部署後的網站位址是 [Brad.log](https://bradcocox.github.io/brad-log/)。
+本文以第一次架站的讀者為對象。範例帳號統一寫成 `YOUR_GITHUB_USERNAME`，範例儲存庫叫 `your-blog`；操作前請換成自己的資料。本文使用的原始碼在 [bradcocox/brad-log](https://github.com/bradcocox/brad-log)，已部署的網站是 [Brad.log](https://bradcocox.github.io/brad-log/)。
 
 ## 先看整條流程
 
@@ -87,6 +88,8 @@ git log --oneline -5
 **成功檢查：** 原本的 commit 還在，模板檔案呈現為新增或修改；不需要刪除 `.git`，也不需要 `git push --force`。
 
 這一步取得的是 [AstroPaper 原版](https://github.com/satnaing/astro-paper)。本文的六大領域、文章類型、程度與驗證狀態，是 Brad.log 加上的功能，不是原版欄位。要直接重現相同分類 UI，請走路線 A；若自行擴充原版，需要一起實作 `src/data/domains.ts`、`src/content.config.ts` 與 `src/pages/categories/`，不能只貼文章的分類欄位。
+
+本次來源交付另因操作環境的推送與檔案上傳限制，使用了一次性 GitHub 匯入 workflow，完成後立即換成正式部署 workflow。實際設定、校驗與提交紀錄保存在 [SETUP 的一次性來源匯入紀錄](https://github.com/bradcocox/brad-log/blob/main/docs/SETUP.md)；這項特殊處理不需要重複，本文的日常維護仍採標準 Git 流程。
 
 ## 2. 安裝工具，先在自己的電腦看見網站
 
@@ -348,11 +351,15 @@ git push origin main
 3. 若失敗，展開第一個失敗步驟閱讀錯誤，不要只看最後一句「Process completed」。
 4. 成功後從部署紀錄或 **Settings → Pages → Visit site** 開啟公開網址。
 
-<!-- 待補：實際成功的 Actions 執行截圖 actions-success.png。圖說須說明 build 與 deploy 均成功，並核對公開截圖沒有私人資訊；取得檔案前不插入圖片連結。 -->
+![GitHub Actions 工作圖顯示 build 與 deploy 均為綠色成功狀態，deploy 下方列出 Brad.log 的公開網址](../../assets/guides/actions-success.jpg)
+
+*圖 6：本機 Chrome 擷取的初次正式部署工作圖。`build` 與 `deploy` 均成功，可對照 [Actions 執行紀錄 42562002827](https://github.com/bradcocox/brad-log/actions/runs/42562002827)；畫面只保留工作流程與公開網站網址。*
 
 **成功檢查：** 公開網址是自己的 `https://YOUR_GITHUB_USERNAME.github.io/your-blog/`；開啟文章後重新整理仍正常，分類與搜尋可用，圖片及 CSS 沒有遺失。Actions 綠燈代表流程通過，仍須到公開網站確認讀者實際看到的內容。
 
-<!-- 待補：正式上線後的首頁截圖 site-home.png。圖說呈現領域入口與首篇教學；實際完成部署及人工檢查後再附圖。 -->
+![Brad.log 正式首頁的完整頁面實拍，包含首篇 AstroPaper 與 GitHub Pages 教學，以及六個專業領域分類入口](../../assets/guides/site-home.jpg)
+
+*圖 7：本機 Chrome 擷取的 [Brad.log 公開首頁](https://bradcocox.github.io/brad-log/)。初次上線時有一篇筆記，六個專業領域已備妥入口；尚無文章的領域顯示 0 篇，後續新增筆記就能逐步累積。*
 
 ## 設定總表：下次要改東西，從哪裡找？
 
