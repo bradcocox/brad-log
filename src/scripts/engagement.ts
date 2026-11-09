@@ -13,7 +13,6 @@ type TurnstileOptions = {
 };
 
 type TurnstileApi = {
-  ready: (callback: () => void) => void;
   render: (container: HTMLElement, options: TurnstileOptions) => string;
   remove: (widgetId: string) => void;
 };
@@ -43,6 +42,8 @@ const dateFormat = new Intl.DateTimeFormat("zh-TW", {
 let memorySession: { day: string; id: string } | undefined;
 let memoryReaction: string | undefined;
 let turnstilePromise: Promise<TurnstileApi> | undefined;
+let turnstileScript: HTMLScriptElement | undefined;
+let notifyTurnstileLoad: ((failed?: boolean) => void) | undefined;
 let cleanUpPage: (() => void) | undefined;
 let initializedRoot: HTMLElement | undefined;
 // Preserve server-requested cooldowns across Astro navigation.
@@ -55,7 +56,11 @@ const formSubmissions = new WeakMap<
 >();
 
 function getTurnstile(): TurnstileApi | undefined {
-  return (window as Window & { turnstile?: TurnstileApi }).turnstile;
+  const api = (window as Window & { turnstile?: Partial<TurnstileApi> })
+    .turnstile;
+  return typeof api?.render === "function" && typeof api.remove === "function"
+    ? (api as TurnstileApi)
+    : undefined;
 }
 
 function storageRead(key: string): string | null {
@@ -169,32 +174,79 @@ function loadTurnstile(): Promise<TurnstileApi> {
   const loaded = getTurnstile();
   if (loaded) return Promise.resolve(loaded);
   if (turnstilePromise) return turnstilePromise;
-  turnstilePromise = new Promise<TurnstileApi>((resolve, reject) => {
-    const script = document.createElement("script");
+
+  // The SDK onload callback supports async loading; ready() must not be mixed
+  // with an async/defer script. Keep this callback available for late arrivals.
+  (
+    window as Window & { __bradLogTurnstileLoaded?: () => void }
+  ).__bradLogTurnstileLoaded = () => notifyTurnstileLoad?.();
+
+  turnstileScript ??= Array.from(document.scripts).find(script => {
+    try {
+      const url = new URL(script.src);
+      return (
+        url.origin === "https://challenges.cloudflare.com" &&
+        url.pathname === "/turnstile/v0/api.js"
+      );
+    } catch {
+      return false;
+    }
+  });
+  // Replace only a known failed download when no usable SDK exists. A timeout
+  // keeps the in-flight global script: removing/reinserting it risks two SDKs.
+  if (turnstileScript?.dataset.bradlogTurnstileState === "error") {
+    turnstileScript.remove();
+    turnstileScript = undefined;
+  }
+  const isNewScript = !turnstileScript;
+  const script = turnstileScript ?? document.createElement("script");
+  turnstileScript = script;
+  if (isNewScript) {
     script.src =
-      "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+      "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=__bradLogTurnstileLoaded";
     script.async = true;
-    script.defer = true;
+  }
+  if (script.dataset.bradlogTurnstileObserved !== "true") {
+    script.dataset.bradlogTurnstileObserved = "true";
+    script.addEventListener(
+      "load",
+      () => {
+        script.dataset.bradlogTurnstileState = "loaded";
+        if (turnstileScript === script) notifyTurnstileLoad?.();
+      },
+      { once: true }
+    );
+    script.addEventListener(
+      "error",
+      () => {
+        script.dataset.bradlogTurnstileState = "error";
+        if (turnstileScript === script) notifyTurnstileLoad?.(true);
+      },
+      { once: true }
+    );
+  }
+
+  turnstilePromise = new Promise<TurnstileApi>((resolve, reject) => {
     let finished = false;
     const finish = (api?: TurnstileApi) => {
       if (finished) return;
       finished = true;
       clearTimeout(timeout);
+      if (notifyTurnstileLoad === onLoad) notifyTurnstileLoad = undefined;
       if (api) resolve(api);
       else {
-        script.remove();
         turnstilePromise = undefined;
         reject(new Error("Verification unavailable"));
       }
     };
-    const timeout = window.setTimeout(() => finish(), 15_000);
-    script.addEventListener("load", () => {
+    const onLoad = (failed = false) => {
       const api = getTurnstile();
-      if (!api) finish();
-      else api.ready(() => finish(api));
-    });
-    script.addEventListener("error", () => finish());
-    document.head.append(script);
+      if (api) finish(api);
+      else if (failed) finish();
+    };
+    const timeout = window.setTimeout(() => finish(), 15_000);
+    notifyTurnstileLoad = onLoad;
+    if (isNewScript) document.head.append(script);
   });
   return turnstilePromise;
 }
