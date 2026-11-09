@@ -66,6 +66,10 @@ const items = withToc ? buildTocTree(headings) : [];
     const progress = fab?.querySelector<HTMLElement>(".post-fab-progress");
     const popover = document.getElementById("toc-popover");
     const sideToc = document.querySelector<HTMLElement>(".toc-side > nav");
+    const interactionArea = document.querySelector<HTMLElement>(
+      "[data-article-engagement]"
+    );
+    const viewport = window.visualViewport;
     if (!fab || !button || !progress) return;
 
     const scrollToTop = () => {
@@ -107,6 +111,29 @@ const items = withToc ? buildTocTree(headings) : [];
     let frame = 0;
     function update() {
       frame = 0;
+      // The floating navigation belongs to article reading. Once the following
+      // interaction section enters view, leave its controls completely clear.
+      const viewportBottom =
+        (viewport?.offsetTop ?? 0) + (viewport?.height ?? innerHeight);
+      const inInteractions = Boolean(
+        interactionArea &&
+        interactionArea.getBoundingClientRect().top <= viewportBottom
+      );
+      if (inInteractions) {
+        const hadTocFocus =
+          fab!.contains(document.activeElement) ||
+          popover?.contains(document.activeElement);
+        closePopover();
+        fab!.hidden = true;
+        if (hadTocFocus && interactionArea) {
+          const focusTarget =
+            interactionArea.querySelector<HTMLElement>("h2") ?? interactionArea;
+          if (!focusTarget.hasAttribute("tabindex")) focusTarget.tabIndex = -1;
+          focusTarget.focus({ preventScroll: true });
+        }
+      } else {
+        fab!.hidden = false;
+      }
       // CSS hides a side TOC with no room, but can't tell the button from there.
       fab!.toggleAttribute("data-side-toc-hidden", sideToc?.offsetWidth === 0);
       // A popover left open would outlive the button that closes it.
@@ -117,7 +144,7 @@ const items = withToc ? buildTocTree(headings) : [];
       progress!.style.setProperty("--progress", `${ratio * 100}%`);
 
       // A TOC button is useful from the start; back to top only once scrolled.
-      const isVisible = opensToc || ratio > 0.3;
+      const isVisible = !inInteractions && (opensToc || ratio > 0.3);
       if (isVisible !== lastVisible) {
         fab!.toggleAttribute("data-visible", isVisible);
         lastVisible = isVisible;
@@ -129,17 +156,23 @@ const items = withToc ? buildTocTree(headings) : [];
 
     button.addEventListener("click", onButtonClick);
     document.addEventListener("click", onDocClick);
+    document.addEventListener("focusin", schedule);
     popover?.addEventListener("toggle", onToggle);
     addEventListener("scroll", schedule, { passive: true });
     addEventListener("resize", schedule);
+    viewport?.addEventListener("resize", schedule);
+    viewport?.addEventListener("scroll", schedule);
     update();
 
     cleanup = () => {
       button.removeEventListener("click", onButtonClick);
       document.removeEventListener("click", onDocClick);
+      document.removeEventListener("focusin", schedule);
       popover?.removeEventListener("toggle", onToggle);
       removeEventListener("scroll", schedule);
       removeEventListener("resize", schedule);
+      viewport?.removeEventListener("resize", schedule);
+      viewport?.removeEventListener("scroll", schedule);
       cancelAnimationFrame(frame);
     };
   }
@@ -166,6 +199,9 @@ const items = withToc ? buildTocTree(headings) : [];
     opacity: 1;
     translate: 0;
     visibility: visible;
+  }
+  .post-fab[hidden] {
+    display: none;
   }
   .post-fab-btn {
     position: relative;
