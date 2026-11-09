@@ -1,12 +1,34 @@
 # Brad.log 設定與維護手冊
 
-本文件保存可重現的設定、位置、原因與驗證方式。公開教學位於 `src/content/posts/github-pages-astropaper-guide.md`。所有真實密碼、API key、登入 cookie、私鑰與個人 Token 都不得寫入本文件或 Git 歷史。
+本文件保存可重現的設定、位置、原因與驗證方式。公開教學位於 `src/content/posts/github-pages-astropaper-guide.md`。所有真實密碼、私人／管理用 API key、登入 cookie、私鑰與個人 Token 都不得寫入本文件或 Git 歷史。Turnstile 的 public site key 是提供瀏覽器使用的公開識別值，與不可公開的 secret key 不同。
 
 ## 匿名互動與零費用原則
 
 2026-11-09 新增的互動模組採 Cloudflare Workers Free、D1 Free 與 Turnstile Free，讀者不需要 GitHub 或 Cloudflare 帳號。架構、所有設定、統計口徑、資料保留、審核與啟用步驟集中保留在 [匿名互動設定手冊](ENGAGEMENT_SETUP.md)。免費額度用盡時停止 API，不切換付費方案。本文其餘 GitHub Pages 與文章設定繼續適用。
 
-初始前端 `engagementConfig.enabled` 與後端 `FEATURES_ENABLED` 均為關閉；未完成真實免費帳戶設定與連線驗證前，不對外顯示未接通的按鈕或假數字。網站的 `/privacy/` 會依設定說明目前狀態。每次 `pnpm build` 會把實際發布頁面清單輸出成 `dist/engagement-pages.json`；後端驗證新文章時讀取固定本站網址，最多快取五分鐘。
+本次已在使用者的本機 Chrome 完成 Cloudflare 配置，核對 **Workers Free、$0**，沒有付款、綁卡、Paid 升級、GitHub App 或 PAT。**前後端已上線，主要功能已正式驗證**：實際統計讀寫、Turnstile 驗證、按讚 0 → 1、重新整理後仍按讚、取消回 0、空白暱稱留言送出待審、批准後公開及拒絕後隱藏。含 HTML 標籤的測試內容維持純文字，QA 留言已在驗證後從公開列表隱藏；未刪除其他讀者資料或歸零統計。
+
+Turnstile 載入修正 [946e30e](https://github.com/bradcocox/brad-log/commit/946e30e1e93d0e7b35c80b9c45530f87ad1dc23c) 的 [run 42597413477](https://github.com/bradcocox/brad-log/actions/runs/42597413477) 成功；手機浮動目錄修正 [bf437ae](https://github.com/bradcocox/brad-log/commit/bf437aeffe460b61ba8ef77ee23a6f950da7ea6b) 的 [run 42598765590](https://github.com/bradcocox/brad-log/actions/runs/42598765590) 也成功。正式 1440px／390px 檢視均無整頁水平溢位；390px 下送出按鈕高 44px，互動區不受浮動目錄遮擋，回正文後目錄仍可使用。深色切換保留草稿、要求重新驗證，並已完成實際重新驗證。
+
+實測使用本機 Chrome，其既有 GitHub 登入狀態沒有清除；網站沒有要求 GitHub 登入，也沒有 GitHub OAuth 流程。本輪未另測登出／無痕、DNT／GPC、真正 BFCache 或正式配額耗盡情境。Cron 已配置，實際執行／清理紀錄仍待觀察。這些是驗證範圍與維護限制，主要互動流程已完成；完整證據見 [互動手冊第 13 節](ENGAGEMENT_SETUP.md#13-正式驗證紀錄) 及 [部署狀態](DEPLOYMENT_STATUS.md)。
+
+| 後端設定 | 本次實際值／狀態 |
+| --- | --- |
+| Worker URL | `https://brad-log-community.bradcocox.workers.dev`；使用免費平台子網域，沒有自訂網域；Preview URLs 已關閉 |
+| D1 與 binding | `brad-log-community`；Worker binding 名稱 `DB`；應用程式 8 表、6 索引、3 觸發器 |
+| Production 一般變數 | `FEATURES_ENABLED="true"`；只配置 Production |
+| Production 秘密 | `SIGNING_SECRET`、`TURNSTILE_SECRET` 均為 Encrypted secrets；不寫入檔案或公開截圖 |
+| Runtime 與排程 | Compatibility date `2026-11-09`；cron `*/10 * * * *` |
+| Observability | Logs、Traces、Issues 關閉；不代表平台完全不處理安全日誌 |
+| Turnstile | Managed、hostname `bradcocox.github.io`、pre-clearance Off |
+| Turnstile public site key | `0x4AAAAAAF5s44CmPYe6KGwg`；只有此公開值可放入前端 |
+| 部署方式 | `backend/` 執行 `npm run bundle`，將 `backend/dist/worker.mjs` 完整貼入 Dashboard Edit Code 後部署 |
+
+初始化 D1 時，在 `backend/` 執行 **`npm run migration:console`**，貼上生成的 **`backend/dist/0001_community.console.sql`**。本次 Console 會移除換行，直接貼含 `--` 註解的原始 migration 可能使後續 SQL 被註解掉；helper 會先用 SQLite 比對原始與單行 SQL 的 schema、初始計數與重複執行結果。詳細操作及物件清單見互動手冊第 5 節。
+
+**不要直接用 `backend/wrangler.jsonc` 部署 Production。** 它仍保留 `FEATURES_ENABLED="false"` 與 `REPLACE_WITH_D1_DATABASE_ID`，是起始模板，不是線上設定備份；誤用可能覆蓋開關或破壞 binding。本次沒有把實際 database UUID、私人 account ID 或 Email 寫進 repo。日後若改 Git／Wrangler 部署，需先確認如何完整保留 Production 設定，不能直接套用這份模板。
+
+全新重建時前後端仍應從關閉開始，依互動手冊先配置後端、驗證，再最後開啟 `src/data/engagement.ts` 的前端開關。網站的 `/privacy/` 會依設定說明狀態；關閉時不顯示互動表單或發出統計與 Turnstile 請求。每次 `pnpm build` 會把實際發布頁面清單輸出成 `dist/engagement-pages.json`；後端驗證新文章時讀取固定本站網址，最多快取五分鐘。
 
 ## 1. 專案來源與版本
 
@@ -216,7 +238,9 @@ draft: false
 
 正式 workflow 替換 commit 為 [`0d267fd25cf9762c1e9957ed16ccf29dcda5f5be`](https://github.com/bradcocox/brad-log/commit/0d267fd25cf9762c1e9957ed16ccf29dcda5f5be)。[初次正式 Pages 部署紀錄 42562002827](https://github.com/bradcocox/brad-log/actions/runs/42562002827) 的 `build` 與 `deploy` 均成功，公開網址 [Brad.log](https://bradcocox.github.io/brad-log/) 已可訪問；精確執行與完成時間以該次 Actions 紀錄為準。
 
-本機 Chrome 的實拍保存於 `src/assets/guides/actions-success.jpg` 與 `src/assets/guides/site-home.jpg`，並用於首篇文章的圖 6、圖 7。Actions 圖只保留工作圖，首頁圖保留完整頁面；沒有加入私人帳戶設定畫面或聯絡資訊。部署成功與各項 UI 驗證分開記錄，文章狀態在完整功能檢查完成前維持 `learning`。
+初次部署的本機 Chrome 實拍保存於 `src/assets/guides/actions-success.jpg` 與 `src/assets/guides/site-home.jpg`，並用於首篇文章的圖 6、圖 7。Actions 圖只保留工作圖，首頁圖保留完整頁面；沒有加入私人帳戶設定畫面或聯絡資訊。當時部署成功與 UI 驗證分開記錄，驗證完成前文章為 `learning`，完成後已更新為 `verified`。
+
+2026-11-09 的匿名互動更新再為首篇加入「延伸：讓讀者不用帳號也能參與」章節及圖 8，使用已批准 QA 留言的安全實拍，並連結完整互動手冊與隱私頁。初始七張圖的紀錄仍保留；新增圖 8 是此次互動功能驗證的補充，圖中 QA 留言已在測試後隱藏。
 
 ## 5. 實際更新流程
 
@@ -237,7 +261,7 @@ git push origin main
 
 ## 6. 建置檢查、發布檢查與限制
 
-`pnpm build` 順序：來源憑證模式掃描 → `astro check` → `astro build` → `pagefind --site dist` → 複製索引供本機開發 → 產出文字檔掃描。
+`pnpm build` 順序：來源憑證模式掃描 → `node --test backend/test/worker.test.mjs` → `astro check` → `astro build` → `pagefind --site dist` → 複製索引供本機開發 → 產生 `dist/engagement-pages.json` → 產出文字檔掃描。這會檢查應用程式與 SQL 的受控測試；不會自動替 Cloudflare 配置資源或部署 Worker，也不代替正式 Turnstile 驗證。
 
 人工確認：首頁與六個分類、文章閱讀與放大圖片、手機選單、明暗主題、中文／英文搜尋、空結果、RSS、sitemap、圖片與子路徑、所有截圖中的敏感資訊。確認的是當次內容與環境，並非滲透測試或安全保證。
 
@@ -256,11 +280,18 @@ git push origin main
 | 圖片無法建置 | 檔名大小寫、相對路徑、原圖是否已加入Git |
 | 套件安裝失敗 | Node與pnpm版本、lockfile是否提交；不先刪鎖檔硬裝最新版 |
 | 掃描器阻止發佈 | 本機檢查回報檔案與行號；不得把真實匹配值貼上公開日誌 |
+| D1 Console 貼完 migration 卻沒有建表 | Console 可能移除了換行，讓 `--` 註解吃掉後續 SQL；使用 `npm run migration:console` 的單行產物，核對 8 表／6 索引／3 觸發器，不刪除既有資料重來 |
+| 文章沒有統計、按讚或留言區 | 先看前端 `enabled`、HTTPS `apiBase`、公開 site key 與實際 Pages 部署版本；關閉時不顯示互動介面是預期行為 |
+| Worker 回 503 或 `/health` 不成功 | 核對 Production 的 `FEATURES_ENABLED="true"`、`DB` binding、初始 schema 與兩個 runtime secrets，並檢查免費額度；不把秘密貼進錯誤報告 |
+| `/health` 成功，但按讚／留言失敗 | 健康檢查不驗證真正的 Turnstile challenge；檢查 widget hostname、對應 site key／secret、`like`／`comment` action，以及兩處 `TextDecoder` 相容性修正是否已重新 bundle 並部署 |
+| Wrangler 部署後互動突然停止 | Repo 的 Wrangler 檔仍是 `false` 與 D1 placeholder 模板；停止重複部署，按互動手冊核對並恢復 Production 的正確開關與 binding，不刪除資料庫 |
 
 ## 8. 還原與未來維護
 
 一般內容錯誤可用新的修正 commit，或確認目標後 `git revert <commit>`，再由 Actions 發布；不要為了普通修改強制推送或刪除歷史。如果是敏感資料外洩，先撤銷憑證再處理歷史及各種副本，不能只靠 revert。
 
 保存這個 repo 即可保留程式、圖文、版本鎖定及工作流程。換電腦後 clone、安裝指定版本、frozen-lockfile建置。GitHub Pages 的 Source 等後台設定不在 Git 中，因此此手冊另列位置與值。後續更新主題請用分支比較變更，保留分類擴充、文章、資產與本手冊。
+
+Cloudflare Production 設定、runtime secrets 與 D1 真實資料也不在這個 repo 內。恢復互動服務時需依互動手冊重新核對 binding、變數、秘密、cron 與 Turnstile；D1 備份應保存於受保護且不公開的位置，不能把含留言、暱稱或匿名識別資料的 dump 提交到 GitHub。來源碼、公開設定手冊與私人資料備份各自有不同用途，單獨 clone repo 不會還原既有訪問數或留言。
 
 官方參考：[Astro部署GitHub](https://docs.astro.build/en/guides/deploy/github/)、[AstroPaper](https://github.com/satnaing/astro-paper)、[GitHub Actions安全](https://docs.github.com/en/actions/reference/security/secure-use)、[Astro環境變數](https://docs.astro.build/en/guides/environment-variables/)。

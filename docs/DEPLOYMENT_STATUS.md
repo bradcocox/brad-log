@@ -68,7 +68,7 @@
 
 本次沒有建立 PAT、自訂部署 Secret 或部署私鑰，沒有改寫既有 Git 歷史或修改帳戶層級設定。公開 repo 的原始檔與 Git 歷史仍屬公開資料；保密規則與處置方式請見 [SECURITY.md](../SECURITY.md)。
 
-## 免費匿名互動：程式完成，等待免費帳戶配置
+## 免費匿名互動：首階段程式與待配置狀態（歷史紀錄）
 
 後續需求已確定為「讀者沒有 GitHub 帳號也能參與」與「零支出」。新增 Cloudflare Workers Free＋D1 Free＋Turnstile Free 的後端，以及同正文左界的匿名按讚／留言、每頁／全站統計元件。詳細設定與可重現步驟見 [ENGAGEMENT_SETUP.md](ENGAGEMENT_SETUP.md)。
 
@@ -87,3 +87,60 @@
 ![390px 手機寬度的隱私說明頁](ui-review/community/03-privacy-mobile.jpg)
 
 已保存不含帳密的 [Cloudflare 登入頁實拍](ui-review/community/01-cloudflare-sign-in.jpg)，並在設定手冊說明目前待完成的步驟。後續 Pages 發布結果以 [Publish Brad.log](https://github.com/bradcocox/brad-log/actions/workflows/deploy.yml) 的正式紀錄為準；動態服務啟用須另外明確記錄，不以靜態網站部署成功代替。
+
+## 2026-11-09：免費匿名互動正式啟用
+
+使用者在本機 Chrome 登入 Cloudflare 後，已完成正式資源配置與文章上的實際互動驗證。讀者可直接按讚及留言；本次沒有付款、綁卡或升級 Paid，也沒有安裝 GitHub App、建立 PAT 或加入付費部署服務。逐步流程、公開與秘密設定的界線、審核 SQL 及排錯紀錄見 [ENGAGEMENT_SETUP.md](ENGAGEMENT_SETUP.md)。
+
+### 實際配置與發布
+
+- 帳戶畫面顯示 **Workers Free、$0、Current plan**。Worker 與 D1 都命名為 `brad-log-community`；D1 已建立 8 個應用程式資料表、6 個自訂索引、3 個觸發器。
+- 正式 API 為 `https://brad-log-community.bradcocox.workers.dev`。Production 的 `DB` binding 指向正式資料庫，`FEATURES_ENABLED` 為字串 `true`；`SIGNING_SECRET` 與 `TURNSTILE_SECRET` 都使用加密 Secret 類型，沒有寫入公開 repo 或前端。
+- Turnstile 使用 Managed 模式，hostname 為 `bradcocox.github.io`，pre-clearance 關閉。Worker Preview URLs 關閉；Logs／Traces／Issues 關閉；Compatibility date 為 `2026-11-09`；短期資料清理 cron 設為 `*/10 * * * *`。
+- `/health` 成功回 `configured`，首次 `/v1/stats` 確實從新資料庫讀到全 0；其後正式瀏覽已產生非零彙總。初始 0 與健康檢查不單獨用作按讚或留言成功證據。
+- 啟用來源為 [`9809387`](https://github.com/bradcocox/brad-log/commit/9809387)，包含前端公開設定、Worker 相容性修正與 D1 Console 單行 migration helper；[來源匯入 run 42596333358](https://github.com/bradcocox/brad-log/actions/runs/42596333358) 成功。隨後恢復正式 `Publish Brad.log`，啟用發布 [`44e625e`](https://github.com/bradcocox/brad-log/commit/44e625e80fa4408115c31fd1b91720c45208c865) 的 [run 42596459899](https://github.com/bradcocox/brad-log/actions/runs/42596459899) 成功。
+- 首次正式操作找出 Turnstile 非同步載入與 `ready()` 混用問題；已改為官方 `onload` 回呼、共用 SDK 及可恢復的載入狀態，沒有降低驗證。修正 [`946e30e`](https://github.com/bradcocox/brad-log/commit/946e30e1e93d0e7b35c80b9c45530f87ad1dc23c) 的 [run 42597413477](https://github.com/bradcocox/brad-log/actions/runs/42597413477) 成功；下列互動結果來自修正後的正式站。
+
+![免費帳戶方案的正式畫面](ui-review/community/04-workers-free.jpg)
+
+![Production 的加密 secrets、DB binding 與關閉的日誌設定](ui-review/community/05-production-secrets.jpg)
+
+以上設定實拍已逐張檢視，不含秘密值、私人 Email、account ID 或資料庫 UUID。方案截圖只證明查核當下為 Free，不表示第三方方案永遠不變。
+
+### 正式讀者操作結果
+
+| 項目 | 實際觀察 |
+| --- | --- |
+| 每頁與全站統計 | 文章與首頁取得真實累積訪問及近 2 分鐘活躍估計；沒有數據時的載入符號與取得數字後的狀態分開 |
+| 主動互動前的驗證 | 首次重新載入文章時沒有 Turnstile script／iframe；按讚或開留言表單後才載入 |
+| 按讚、保存與取消 | 0 → 1，重新整理後 `aria-pressed=true` 且仍為 1；取消後回到 0／false，顯示「已取消回應。」 |
+| 匿名留言送出 | 留空暱稱、輸入明確標示的 QA 留言；Turnstile 完成後成功送出，表單收起，焦點回到「再寫一則留言」 |
+| 待審隔離 | D1 僅有該筆測試留言為 `pending`；重新整理公開頁仍沒有留言 |
+| 核准與純文字 | 僅核准該筆測試留言後，公開頁顯示「訪客」與內容；`<b>` 保留為字面文字，留言 DOM 沒有產生 `b` 元素 |
+| 測試資料收尾 | 將同一筆 QA 留言改為 `rejected`；重新整理後公開列表恢復空白。沒有永久刪除其他留言或歸零訪問數 |
+| 表單草稿 | 收起並重新開啟後保留輸入，仍可重新完成驗證 |
+| 頁面導覽 | 首頁 → 文章、返回及前進後，互動設定根節點與文章互動區維持單一份；此項不當作真正 BFCache 驗證 |
+| 桌機對齊 | 1440px 視窗中，標題、正文與互動區左界均為 42.75px、寬 864px，整頁水平溢位為 0 |
+| 手機對齊與長文字 | 390px 視窗（可用內容寬 375px）中，標題、正文、互動區及表單左界均為 20px、寬 335px；長字串正常換行、整頁水平溢位為 0，三個主要按鈕高度均為 44px |
+| 手機浮動目錄 | 互動區進入視窗時，浮鈕為 `hidden=true`／`display:none`，不覆蓋送出按鈕；回正文時恢復，開啟目錄及 Escape 關閉正常 |
+| 深淺主題與驗證 | 切到深色後草稿保留、送出暫停並要求重新驗證；真實重新驗證成功，完成後已回到淺色並清空未送出的測試草稿 |
+
+![核准 QA 留言後的正式桌機畫面，HTML 標籤保持為純文字](ui-review/community/06-approved-comment-desktop.jpg)
+
+此圖保留核准後的測試證據；圖中的 QA 留言已於驗證後隱藏，並非預先填入的示範留言。空白暱稱顯示「訪客」，長字串在欄寬內換行。
+
+手機浮鈕修正 [`bf437ae`](https://github.com/bradcocox/brad-log/commit/bf437aeffe460b61ba8ef77ee23a6f950da7ea6b) 的 [run 42598765590](https://github.com/bradcocox/brad-log/actions/runs/42598765590) 成功。正式 390px 後測完成；此輪手機頁的瀏覽器紀錄未觀察到 warning／error。桌機側欄目錄保留原有配置。
+
+首篇初學者教學新增「延伸：讓讀者不用帳號也能參與」，以圖 8 連結本次實拍、免費互動設定手冊與隱私說明。原本「不需要任何 Secret」的敘述已限定為 GitHub Pages 的自訂 Actions Secret，並說明新增互動後端的秘密值必須留在 Cloudflare。
+
+![390px 手機留言表單，Turnstile 驗證成功且送出按鈕沒有被浮動目錄遮擋](ui-review/community/07-comment-form-mobile.jpg)
+
+測試使用使用者的本機 Chrome，該瀏覽器本身仍有 GitHub 登入狀態；網站互動沒有跳出登入要求，也不使用 GitHub OAuth／帳號憑證。本輪沒有宣稱另行測過登出、無痕或不同裝置。
+
+### 驗證界線與維護
+
+修正後的本機完整 `pnpm build` 通過：18 項後端測試、81 個 Astro 檢查檔案（0 errors／warnings／hints）、20 個靜態頁面、19 頁／1 篇文章的公開允許清單，以及來源／輸出支援模式掃描。正式 Pages CI 也通過。截圖另做人工檢查；模式掃描不等於完整安全稽核。
+
+未在正式環境刻意觸發大量流量、CPU／免費額度耗盡、429、DNT／GPC 或真正 BFCache 的中途送出恢復。這些情境依程式審閱與對應本機測試說明，不冒充實機通過。Cron 已配置；首次查看事件頁時仍提示新 Worker 的紀錄可能延後最多 30 分鐘，當時未看到實際執行紀錄，因此沒有把設定存在寫成清理已驗證。
+
+「累積訪問」是啟用後的瀏覽次數，不能補算此前歷史，也不等於不重複真人數；「近 2 分鐘活躍」是短期估計。網站不公開個別訪客識別、IP 或正在閱讀的頁面清單。留言需要 Brad 在 Cloudflare 後台審核；公開設定、審核步驟、保留期限及免費額度到限時的處理已保存在互動手冊，實際 secrets 與私人資料備份不屬於公開文件。

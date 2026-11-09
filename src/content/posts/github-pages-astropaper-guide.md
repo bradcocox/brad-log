@@ -2,7 +2,7 @@
 title: 從零開始：用 AstroPaper 與 GitHub Pages 架設技術部落格
 author: Brad
 pubDatetime: 2026-11-09T11:00:00+08:00
-modDatetime: 2026-11-09T12:35:00+08:00
+modDatetime: 2026-11-09T10:15:25Z
 featured: true
 draft: false
 category: devops-cloud
@@ -316,7 +316,7 @@ jobs:
 - `workflow_dispatch`：也能從 Actions 分頁手動執行。
 - `withastro/action`：依專案設定安裝依賴、執行建置並上傳網站 artifact，也就是部署使用的輸出檔案。
 - `needs: build`：建置成功後才開始部署；建置階段只有讀取原始碼的權限。
-- `pages: write` 與 `id-token: write`：只給部署工作，用來授權 Pages 發布。**這個網站不需要新增 PAT、部署私鑰或任何自訂 Secret。**
+- `pages: write` 與 `id-token: write`：只給部署工作，用來授權 Pages 發布。**這條 GitHub Pages 靜態發布流程不需要新增 PAT、部署私鑰或自訂 Actions Secret。** 後續若加入留言等後端功能，該服務的秘密值必須另外留在後端。
 
 `persist-credentials: false` 不把 checkout 的 Git 認證留給後續步驟；`cache: false` 是本版採用的設定。固定 SHA 能明確指出執行的 Action 程式版本，未來升級時應查閱官方版本並重新驗證，不要任意替換成網路上不明來源的 SHA。官方工具見 [withastro/action](https://github.com/withastro/action) 與 [deploy-pages](https://github.com/actions/deploy-pages)。
 
@@ -398,7 +398,7 @@ git push origin main
 - **`draft: true` 只控制網站是否刊登。** 它不能保護已提交到公開 repo 的草稿。未公開內容請先保存在尚未推送的位置。
 - **靜態網站不放秘密。** 密碼、token、私鑰、私人聯絡資訊、公司內網位址與未公開截圖，都不應出現在文章、原始碼或圖片中。公開教學只用明確的佔位文字。
 - **`PUBLIC_` 代表可公開給前端。** Astro 的這類環境變數可進入瀏覽器程式；不要用它裝秘密。即使沒有這個前綴，只要建置程式把內容寫進 HTML 或 JavaScript，仍會公開。詳見 [Astro 環境變數文件](https://docs.astro.build/en/guides/environment-variables/)。
-- **Actions Secrets 不是讓前端保密的魔法。** Secrets 可以保護工作流程設定中的敏感值，但把值輸出到靜態檔案後，訪客仍能讀取。本網站不需要新增任何 Secret；[官方 Secrets 文件](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets)適合在未來真的有服務整合需求時再看。
+- **Actions Secrets 不是讓前端保密的魔法。** Secrets 可以保護工作流程設定中的敏感值，但把值輸出到靜態檔案後，訪客仍能讀取。本篇的 Pages 發布不需要自訂 Actions Secret。Brad.log 後續加入匿名互動時，驗證秘密值與簽章秘密值只保存在 Cloudflare Worker 的加密 Secret，前端只取得公開 API 網址與 Turnstile site key；完整步驟見 [匿名互動設定手冊](https://github.com/bradcocox/brad-log/blob/main/docs/ENGAGEMENT_SETUP.md)。[GitHub 官方 Secrets 文件](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets)可協助理解工作流程中的保護範圍。
 - **`.gitignore` 不會移除已提交的內容或歷史。** 若曾誤推有效憑證，先撤銷或輪替，再依 [GitHub 敏感資料移除文件](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/removing-sensitive-data-from-a-repository)處理；單純刪檔再 commit 並不足夠。
 
 本專案的自動掃描只能攔下一部分常見模式，無法判斷每張截圖、每段筆記是否適合公開。發布前仍要人工查看，尤其是瀏覽器分頁、帳號選單、終端機畫面與圖片背景。
@@ -415,6 +415,20 @@ git push origin main
 | 本機搜尋沒結果 | 是否已產生 Pagefind 索引 | 先 `pnpm build`，再 `pnpm preview` |
 | build 成功，deploy 失敗 | Pages Source、job 權限、環境限制 | 對照 workflow 與失敗步驟；不靠新增 PAT 解決 |
 | 推送後還看到舊文章 | Actions 是否跑完，網址是否正確 | 核對 commit、重新整理；別把本機預覽與公開網站混淆 |
+
+## 延伸：讓讀者不用帳號也能參與
+
+文章發布後，Brad.log 又接上了免費的匿名互動：每頁與全站的累積訪問、近兩分鐘活躍估計，以及文章底下的按讚、取消與留言。讀者不用註冊 GitHub，也不用提供 Email；暱稱留空時會顯示「訪客」。
+
+這些功能需要一個能保存資料的後端。GitHub Pages 繼續提供文章，Cloudflare Worker 接收互動請求，D1 保存彙總與留言，Turnstile 在讀者主動互動時提供防垃圾驗證。留言會先進入待審區，由 Brad 在 Cloudflare 後台核准後才公開。
+
+![正式文章底下的匿名按讚、留言入口與核准後的純文字測試留言，區塊左側與正文對齊](../../../docs/ui-review/community/06-approved-comment-desktop.jpg)
+
+*圖 8：這是正式網站核准 QA 留言後的實拍。`<b>` 維持字面文字，長字串在欄內換行；這則測試留言已於驗證後隱藏。*
+
+跟著設定時，順序是：確認免費方案，建立 D1 schema，再部署 Worker、接好 `DB` binding 與加密 Secret，設定 Turnstile 的正式 hostname，最後才把公開 API 網址與 site key 填入前端並發布。完整的按鈕位置、設定值、SQL、審核方式與本次排錯都保存在 [免費匿名互動設定手冊](https://github.com/bradcocox/brad-log/blob/main/docs/ENGAGEMENT_SETUP.md)，其中也有服務分工圖及設定實拍。
+
+初學者要特別分清楚 **site key 可以公開，secret key 只能留在後端**。本次沒有新增付款方式或升級付費方案；額度到限時暫停動態互動，文章仍可閱讀。累積訪問從啟用後開始計算，不會補算以前的歷史，也不等於不重複的真人數；活躍數字則是最近兩分鐘的估計。資料保留與匿名識別的限制見 [隱私與互動說明](https://bradcocox.github.io/brad-log/privacy/)。
 
 ## 之後每次更新，重複這條小流程
 
