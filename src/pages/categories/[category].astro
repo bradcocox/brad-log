@@ -1,0 +1,108 @@
+---
+import { getCollection } from "astro:content";
+import { getRelativeLocaleUrl } from "astro:i18n";
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+import Card from "@/components/Card.astro";
+import DomainIcon from "@/components/DomainIcon.astro";
+import { DOMAINS, type Domain } from "@/data/domains";
+import { getSortedPosts } from "@/utils/getSortedPosts";
+import config from "@/config";
+export function getStaticPaths() {
+  return DOMAINS.map(domain => ({
+    params: { category: domain.id },
+    props: { domain },
+  }));
+}
+interface Props {
+  domain: Domain;
+}
+const { domain } = Astro.props;
+const locale = Astro.currentLocale ?? config.site.lang;
+const posts = getSortedPosts(await getCollection("posts")).filter(
+  post => post.data.category === domain.id
+);
+---
+
+<Layout
+  title={domain.name + " | " + config.site.title}
+  description={domain.description}
+>
+  <Header />
+  <main
+    id="main-content"
+    class="wide-layout collection-main"
+    data-category-page
+  >
+    <nav class="breadcrumbs" aria-label="所在位置">
+      <a href={getRelativeLocaleUrl(locale, "")}>首頁</a><span
+        aria-hidden="true">/</span
+      ><a href={getRelativeLocaleUrl(locale, "categories")}>專業領域</a><span
+        aria-hidden="true">/</span
+      ><span aria-current="page">{domain.name}</span>
+    </nav>
+    <header class="collection-header domain-header">
+      <span class="domain-icon"><DomainIcon domain={domain.id} /></span><p
+        class="eyebrow"
+        lang="en"
+      >
+        {domain.english}
+      </p><h1>{domain.name}</h1><p>{domain.description}</p><ul
+        class="topic-chips"
+        aria-label="探索方向"
+      >
+        {domain.topics.map(topic => <li>{topic}</li>)}
+      </ul>
+    </header>
+    <nav class="domain-tabs" aria-label="切換專業領域">
+      {
+        DOMAINS.map(item => (
+          <a
+            href={getRelativeLocaleUrl(locale, "categories/" + item.id)}
+            aria-current={item.id === domain.id ? "page" : undefined}
+          >
+            {item.name}
+          </a>
+        ))
+      }
+    </nav>
+    <div class="list-summary">
+      <p><strong>{posts.length}</strong> 篇筆記</p><span>依最近更新排序</span>
+    </div>
+    {
+      posts.length ? (
+        <ul class="post-grid">
+          {posts.map(post => (
+            <Card {...post} />
+          ))}
+        </ul>
+      ) : (
+        <section class="empty-state">
+          <>
+            <span class="empty-icon" aria-hidden="true">
+              ＋
+            </span>
+            <h2>這個領域，從下一次學習開始。</h2>
+            <p>目前尚未有公開筆記。內容會在完成整理後出現在這裡。</p>
+            <a
+              class="primary-button"
+              href={getRelativeLocaleUrl(locale, "posts")}
+            >
+              先閱讀現有文章 <span aria-hidden="true">→</span>
+            </a>
+          </>
+        </section>
+      )
+    }
+  </main>
+  <Footer />
+</Layout>
+<script>
+  const saveCategory = () => {
+    if (document.querySelector("[data-category-page]"))
+      sessionStorage.setItem("backUrl", location.pathname);
+  };
+  saveCategory();
+  document.addEventListener("astro:page-load", saveCategory);
+</script>

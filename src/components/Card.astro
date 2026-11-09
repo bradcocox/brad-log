@@ -1,0 +1,60 @@
+---
+import type { CollectionEntry } from "astro:content";
+import { getRelativeLocaleUrl } from "astro:i18n";
+import { getPostUrl } from "@/utils/getPostPaths";
+import { toTransitionName } from "@/utils/toTransitionName";
+import { getDomain, CONTENT_TYPE_LABELS, LEVEL_LABELS } from "@/data/domains";
+import config from "@/config";
+type Props = CollectionEntry<"posts"> & {
+  variant?: "h2" | "h3";
+  prominent?: boolean;
+};
+const {
+  variant: Heading = "h2",
+  prominent = false,
+  id,
+  data,
+  filePath,
+} = Astro.props;
+const locale = Astro.currentLocale ?? config.site.lang;
+const domain = getDomain(data.category);
+const url = getPostUrl(id, filePath, locale);
+const updated = data.modDatetime ?? data.pubDatetime;
+const dateLabel = new Intl.DateTimeFormat("zh-TW", {
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+  timeZone: config.site.timezone,
+}).format(updated);
+---
+
+<li
+  class:list={["post-card", { "post-card-prominent": prominent }]}
+  data-post-card
+  data-category={data.category}
+  data-content-type={data.contentType}
+  data-published={data.pubDatetime.valueOf()}
+  data-updated={updated.valueOf()}
+>
+  <div class="post-card-meta">
+    <a
+      class="category-badge"
+      href={getRelativeLocaleUrl(locale, "categories/" + domain.id)}
+      >{domain.name}</a
+    >
+    <span>{CONTENT_TYPE_LABELS[data.contentType]}</span><span
+      class="level-badge">{LEVEL_LABELS[data.level]}</span
+    >
+  </div>
+  <Heading transition:name={toTransitionName(id)}
+    ><a href={url}>{data.title}</a></Heading
+  >
+  <p class="post-card-description">{data.description}</p>
+  <div class="post-card-footer">
+    <span
+      >{data.modDatetime ? "更新於" : "發佈於"}
+      <time datetime={updated.toISOString()}>{dateLabel}</time></span
+    ><a href={url} aria-label={"閱讀筆記：" + data.title}
+      >閱讀筆記 <span aria-hidden="true">→</span></a>
+  </div>
+</li>

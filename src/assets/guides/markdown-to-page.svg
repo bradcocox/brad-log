@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="810" viewBox="0 0 1100 810" role="img" aria-labelledby="title desc">
+  <title id="title">Markdown 文章檔案與網站呈現的對照</title>
+  <desc id="desc">左邊是一份 Markdown 文章。最前面的 YAML frontmatter 有 title、description、pubDatetime、category、contentType、level 與 tags，接著是 Markdown 正文。右邊是對應的閱讀頁面，顯示文章標題、DevOps 與雲端領域、操作教學類型、初學者程度、技術標籤與正文。</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#1f6054"/></marker>
+    <style>
+      text{font-family:Inter,"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;fill:#172c3c}
+      .title{font-size:35px;font-weight:750}.sub{font-size:23px;fill:#52645f}.label{font-size:25px;font-weight:700}.code{font-family:"SFMono-Regular",Consolas,"Noto Sans TC",monospace;font-size:22px;fill:#dbe7e1}.small{font-size:22px;fill:#52645f}.chip{font-size:22px;font-weight:650;fill:#1f6054}.article-title{font-size:33px;font-weight:750}
+    </style>
+  </defs>
+  <rect width="1100" height="810" rx="24" fill="#fbfaf6"/>
+  <text x="40" y="61" class="title">一份 Markdown，如何變成文章？</text>
+  <text x="40" y="103" class="sub">frontmatter 整理欄位，Markdown 編寫正文。</text>
+  <text x="40" y="150" class="label">文章檔案 .md</text>
+  <text x="622" y="150" class="label">讀者看到的頁面</text>
+  <rect x="40" y="174" width="496" height="540" rx="18" fill="#172c3c"/>
+  <text x="62" y="214" class="code">---</text>
+  <text x="62" y="251" class="code">title: "從零部署技術部落格"</text>
+  <text x="62" y="288" class="code">description: "從筆記到公開網站"</text>
+  <text x="62" y="325" class="code">pubDatetime: 2026-11-09</text>
+  <text x="62" y="362" class="code">category: devops-cloud</text>
+  <text x="62" y="399" class="code">contentType: tutorial</text>
+  <text x="62" y="436" class="code">level: beginner</text>
+  <text x="62" y="473" class="code">tags: [astro, github-pages]</text>
+  <text x="62" y="510" class="code">---</text>
+  <line x1="62" y1="541" x2="514" y2="541" stroke="#415969" stroke-width="1.5"/>
+  <text x="62" y="585" class="code">## 先理解部署流程</text>
+  <text x="62" y="636" class="code">寫筆記 → 推送 → 自動發布</text>
+  <path d="M 552 442 H 603" stroke="#1f6054" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <rect x="622" y="174" width="438" height="540" rx="18" fill="#fff" stroke="#d9e2db" stroke-width="2"/>
+  <text x="646" y="217" class="small">2026 年 11 月 9 日</text>
+  <text x="646" y="268" class="article-title">從零部署</text>
+  <text x="646" y="312" class="article-title">技術部落格</text>
+  <rect x="646" y="340" width="212" height="42" rx="10" fill="#e9f3ed"/>
+  <text x="660" y="368" class="chip">DevOps 與雲端</text>
+  <rect x="646" y="395" width="124" height="42" rx="10" fill="#f0f3ed"/>
+  <text x="660" y="423" class="chip">操作教學</text>
+  <rect x="786" y="395" width="102" height="42" rx="10" fill="#f0f3ed"/>
+  <text x="800" y="423" class="chip">初學者</text>
+  <text x="646" y="479" class="small">#astro　#github-pages</text>
+  <line x1="646" y1="507" x2="1036" y2="507" stroke="#d9e2db" stroke-width="1.5"/>
+  <text x="646" y="552" class="label">先理解部署流程</text>
+  <text x="646" y="595" class="small">寫筆記 → 推送 → 自動發布</text>
+  <text x="646" y="654" class="small">分類資訊和正文，各有自己的位置。</text>
+  <text x="40" y="764" class="small">前面的欄位決定標題與分類；--- 後的 Markdown 會轉成讀者看到的正文。</text>
+</svg>

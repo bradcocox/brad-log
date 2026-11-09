@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="770" viewBox="0 0 1100 770" role="img" aria-labelledby="title desc">
+  <title id="title">用專業領域、文章類型、程度與技術標籤整理文章</title>
+  <desc id="desc">文章的 category、contentType、level 與 tags 四個欄位分開儲存。首篇 GitHub Pages 與 AstroPaper 部署教學的 category 專業領域為 devops-cloud，contentType 文章類型為 tutorial，level 程度為 beginner；tags 技術標籤可包括 github-pages、astropaper 與 astro。領域用來瀏覽專業內容，類型表達文章形式，程度幫助選擇起點，標籤描述具體技術。</desc>
+  <defs><style>
+    text{font-family:Inter,"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;fill:#172c3c}
+    .title{font-size:36px;font-weight:750}.sub{font-size:23px;fill:#52645f}.label{font-size:26px;font-weight:700}.body{font-size:22px;fill:#52645f}.value{font-family:"SFMono-Regular",Consolas,monospace;font-size:28px;font-weight:650;fill:#1f6054}.tag{font-family:"SFMono-Regular",Consolas,monospace;font-size:22px;fill:#254c72}.key{font-size:21px;font-weight:750;fill:#1f6054}
+  </style></defs>
+  <rect width="1100" height="770" rx="24" fill="#fbfaf6"/>
+  <text x="40" y="61" class="title">一篇文章，用四個欄位整理</text>
+  <text x="40" y="102" class="sub">分開描述主題、閱讀方式、程度與技術，之後更容易查找。</text>
+  <rect x="40" y="132" width="1020" height="102" rx="18" fill="#172c3c"/>
+  <text x="64" y="174" class="body" style="fill:#c8dfd6">首篇教學</text>
+  <text x="64" y="210" class="label" style="fill:#fbfaf6">GitHub Pages + AstroPaper：從零部署技術部落格</text>
+  <g>
+    <rect x="40" y="270" width="496" height="192" rx="18" fill="#fff" stroke="#d9e2db" stroke-width="2"/>
+    <text x="64" y="307" class="key">01 · 專業領域 category</text>
+    <text x="64" y="352" class="value">devops-cloud</text>
+    <text x="64" y="390" class="label">DevOps 與雲端</text>
+    <text x="64" y="433" class="body">回答「這篇屬於哪個專業主題？」</text>
+    <rect x="564" y="270" width="496" height="192" rx="18" fill="#fff" stroke="#d9e2db" stroke-width="2"/>
+    <text x="588" y="307" class="key">02 · 文章類型 contentType</text>
+    <text x="588" y="352" class="value">tutorial</text>
+    <text x="588" y="390" class="label">操作教學</text>
+    <text x="588" y="433" class="body">回答「這篇用什麼方式帶我學？」</text>
+    <rect x="40" y="486" width="496" height="192" rx="18" fill="#fff" stroke="#d9e2db" stroke-width="2"/>
+    <text x="64" y="523" class="key">03 · 程度 level</text>
+    <text x="64" y="568" class="value">beginner</text>
+    <text x="64" y="606" class="label">初學者</text>
+    <text x="64" y="649" class="body">回答「我適合從這篇開始嗎？」</text>
+    <rect x="564" y="486" width="496" height="192" rx="18" fill="#edf2f7" stroke="#c8d7e4" stroke-width="2"/>
+    <text x="588" y="523" class="key">04 · 技術標籤 tags</text>
+    <text x="588" y="568" class="tag">github-pages · astropaper</text>
+    <text x="588" y="603" class="tag">astro</text>
+    <text x="588" y="649" class="body">回答「這篇用了哪些具體技術？」</text>
+  </g>
+  <text x="40" y="725" class="body">領域決定去哪裡找；類型說明怎麼讀；程度幫你選起點；標籤補充使用的技術。</text>
+</svg>

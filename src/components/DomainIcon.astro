@@ -1,0 +1,45 @@
+---
+import type { DomainId } from "@/data/domains";
+interface Props {
+  domain: DomainId;
+  class?: string;
+}
+const { domain, class: className } = Astro.props;
+const paths: Record<DomainId, string[]> = {
+  "data-engineering": [
+    "M20 6c0 2.2-16 2.2-16 0s16-2.2 16 0Z",
+    "M4 6v12c0 2.2 16 2.2 16 0V6",
+    "M4 12c0 2.2 16 2.2 16 0",
+  ],
+  "backend-api": ["m8 7-5 5 5 5", "m16 7 5 5-5 5", "m14 4-4 16"],
+  "devops-cloud": [
+    "M7 18H6a4 4 0 0 1-.6-8A6.5 6.5 0 0 1 18 8.5a4.8 4.8 0 0 1 .2 9.5H17",
+    "M12 21V11m-4 4 4-4 4 4",
+  ],
+  "ai-llm": [
+    "M7 7h10v10H7z",
+    "M10 10h4v4h-4z",
+    "M9 3v4m6-4v4M9 17v4m6-4v4M3 9h4m-4 6h4M17 9h4m-4 6h4",
+  ],
+  "system-design": [
+    "M9 3h6v5H9zM3 16h6v5H3zM15 16h6v5h-6z",
+    "M12 8v4m-6 4v-4h12v4",
+  ],
+  "developer-tools": ["M3 4h18v16H3z", "m7 9 3 3-3 3", "M13 15h4"],
+};
+---
+
+<svg
+  class={className}
+  width="24"
+  height="24"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="1.5"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  {paths[domain].map(d => <path d={d} />)}
+</svg>

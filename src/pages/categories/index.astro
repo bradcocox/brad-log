@@ -1,0 +1,56 @@
+---
+import { getCollection } from "astro:content";
+import { getRelativeLocaleUrl } from "astro:i18n";
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+import DomainCard from "@/components/DomainCard.astro";
+import { DOMAINS } from "@/data/domains";
+import { getSortedPosts } from "@/utils/getSortedPosts";
+import config from "@/config";
+const locale = Astro.currentLocale ?? config.site.lang;
+const posts = getSortedPosts(await getCollection("posts"));
+---
+
+<Layout
+  title={"專業領域 | " + config.site.title}
+  description="依資料工程、後端與 API、DevOps 與雲端、AI 與 LLM、系統設計和開發工具，探索 Brad 的工程筆記。"
+>
+  <Header />
+  <main id="main-content" class="wide-layout collection-main">
+    <nav class="breadcrumbs" aria-label="所在位置">
+      <a href={getRelativeLocaleUrl(locale, "")}>首頁</a><span
+        aria-hidden="true">/</span
+      ><span aria-current="page">專業領域</span>
+    </nav>
+    <header class="collection-header">
+      <p class="eyebrow">EXPLORE BY FIELD</p><h1>專業領域</h1><p>
+        選擇想了解的方向，沿著每一次實作累積理解。<br />六個領域，持續整理中的 {
+          posts.length
+        } 篇筆記。
+      </p>
+    </header>
+    <ul class="domain-grid">
+      {
+        DOMAINS.map(domain => (
+          <DomainCard
+            domain={domain}
+            count={
+              posts.filter(post => post.data.category === domain.id).length
+            }
+          />
+        ))
+      }
+    </ul>
+    <aside class="collection-tip">
+      <p>
+        已經有想找的技術？從 <a href={getRelativeLocaleUrl(locale, "tags")}
+          >技術標籤</a
+        > 找關聯，或直接 <a href={getRelativeLocaleUrl(locale, "search")}
+          >搜尋筆記</a
+        >。
+      </p>
+    </aside>
+  </main>
+  <Footer />
+</Layout>

@@ -1,0 +1,134 @@
+---
+import { getRelativeLocaleUrl } from "astro:i18n";
+import IconMenuDeep from "@/assets/icons/IconMenuDeep.svg";
+import IconSunHigh from "@/assets/icons/IconSunHigh.svg";
+import IconSearch from "@/assets/icons/IconSearch.svg";
+import IconMoon from "@/assets/icons/IconMoon.svg";
+import IconX from "@/assets/icons/IconX.svg";
+import { stripBase, stripLocale } from "@/utils/withBase";
+import config from "@/config";
+const locale = Astro.currentLocale ?? config.site.lang;
+const currentPath = stripLocale(stripBase(Astro.url.pathname), locale);
+const nav = [
+  { path: "posts", label: "所有文章" },
+  { path: "categories", label: "專業領域" },
+  { path: "about", label: "關於 Brad.log" },
+];
+const isActive = (path: string) =>
+  currentPath.split("/").filter(Boolean)[0] === path;
+---
+
+<a id="skip-to-content" href="#main-content" class="skip-link">跳至主要內容</a>
+<header class="site-header" data-pagefind-ignore>
+  <div class="wide-layout header-inner">
+    <a
+      class="site-brand"
+      href={getRelativeLocaleUrl(locale, "")}
+      aria-label="Brad.log 首頁"
+    >
+      <span class="brand-mark" aria-hidden="true">b.</span><span
+        >Brad<span class="brand-dot">.</span>log</span
+      >
+    </a>
+    <nav
+      id="menu-items"
+      class="site-nav"
+      aria-label="主要導覽"
+      data-open="false"
+    >
+      {
+        nav.map(item => (
+          <a
+            href={getRelativeLocaleUrl(locale, item.path)}
+            aria-current={isActive(item.path) ? "page" : undefined}
+          >
+            {item.label}
+          </a>
+        ))
+      }
+    </nav>
+    <div class="header-controls">
+      {
+        config.features.search !== false && (
+          <a
+            class="icon-button"
+            href={getRelativeLocaleUrl(locale, "search")}
+            aria-label="搜尋筆記"
+            title="搜尋筆記"
+          >
+            <IconSearch />
+          </a>
+        )
+      }
+      {
+        config.features.lightAndDarkMode && (
+          <button
+            id="theme-btn"
+            type="button"
+            class="icon-button theme-button"
+            title="切換明暗主題"
+            aria-label="切換明暗主題"
+            aria-labelledby="theme-switch-label"
+          >
+            <span id="theme-switch-label" class="sr-only">切換明暗主題</span>
+            <>
+              <IconMoon class="theme-moon" />
+              <IconSunHigh class="theme-sun" />
+            </>
+          </button>
+        )
+      }
+      <button
+        id="menu-btn"
+        type="button"
+        class="icon-button menu-button"
+        aria-label="開啟導覽選單"
+        aria-expanded="false"
+        aria-controls="menu-items"
+        ><IconMenuDeep id="menu-icon" /><IconX
+          id="close-icon"
+          class="hidden"
+        /></button
+      >
+    </div>
+  </div>
+</header>
+<script>
+  function setupHeader() {
+    const button = document.querySelector<HTMLButtonElement>("#menu-btn");
+    const menu = document.querySelector<HTMLElement>("#menu-items");
+    if (!button || !menu || button.dataset.ready) return;
+    button.dataset.ready = "true";
+    const setOpen = (open: boolean) => {
+      button.setAttribute("aria-expanded", String(open));
+      button.setAttribute("aria-label", open ? "關閉導覽選單" : "開啟導覽選單");
+      menu.dataset.open = String(open);
+      document.querySelector("#menu-icon")?.classList.toggle("hidden", open);
+      document.querySelector("#close-icon")?.classList.toggle("hidden", !open);
+    };
+    button.addEventListener("click", () =>
+      setOpen(button.getAttribute("aria-expanded") !== "true")
+    );
+    menu
+      .querySelectorAll("a")
+      .forEach(link => link.addEventListener("click", () => setOpen(false)));
+    document.addEventListener("keydown", event => {
+      if (
+        event.key === "Escape" &&
+        button.getAttribute("aria-expanded") === "true"
+      ) {
+        setOpen(false);
+        button.focus();
+      }
+    });
+    document
+      .querySelector("#skip-to-content")
+      ?.addEventListener("click", () => {
+        const main = document.querySelector<HTMLElement>("#main-content");
+        main?.setAttribute("tabindex", "-1");
+        main?.focus();
+      });
+  }
+  setupHeader();
+  document.addEventListener("astro:page-load", setupHeader);
+</script>

@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="680" viewBox="0 0 1100 680" role="img" aria-labelledby="title desc">
+  <title id="title">從 Markdown 筆記到 GitHub Pages 公開網站的發布流程</title>
+  <desc id="desc">作者編寫 Markdown，推送到 GitHub 儲存庫的 main 分支，觸發 GitHub Actions。Actions 安裝套件、檢查型別、產生靜態網站與 Pagefind 搜尋索引，再將 dist 產物部署到 GitHub Pages。讀者的瀏覽器從 Pages 取得網站檔案。</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#35675e"/></marker>
+    <style>
+      text{font-family:Inter,"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;fill:#172c3c}
+      .title{font-size:36px;font-weight:750}.sub{font-size:23px;fill:#52645f}.label{font-size:24px;font-weight:700}.small{font-size:21px;fill:#52645f}.step{font-size:21px;font-weight:750;fill:#1f6054}.code{font-family:"SFMono-Regular",Consolas,monospace;font-size:23px}.panel{fill:#fff;stroke:#d9e2db;stroke-width:2}.link{stroke:#35675e;stroke-width:2.5;fill:none;marker-end:url(#arrow)}
+    </style>
+  </defs>
+  <rect width="1100" height="680" rx="24" fill="#fbfaf6"/>
+  <text x="40" y="62" class="title">從筆記到公開網站</text>
+  <text x="40" y="101" class="sub">推送到 main 後，重新建置並部署靜態檔案。</text>
+  <g>
+    <rect x="40" y="142" width="184" height="158" rx="18" class="panel"/>
+    <text x="58" y="178" class="step">01 · 撰寫</text>
+    <text x="58" y="222" class="label">Markdown</text>
+    <text x="58" y="266" class="small">新增或修改筆記</text>
+    <path d="M 226 221 H 243" class="link"/>
+    <rect x="248" y="142" width="184" height="158" rx="18" class="panel"/>
+    <text x="266" y="178" class="step">02 · 推送</text>
+    <text x="266" y="222" class="label" style="font-size:22px">GitHub repo</text>
+    <text x="266" y="266" class="small">保留檔案與版本</text>
+    <path d="M 434 221 H 451" class="link"/>
+    <rect x="456" y="142" width="184" height="158" rx="18" fill="#e9f3ed" stroke="#548174" stroke-width="2"/>
+    <text x="474" y="178" class="step">03 · 自動執行</text>
+    <text x="474" y="222" class="label">Actions</text>
+    <text x="474" y="266" class="small">建置與部署產物</text>
+    <path d="M 642 221 H 659" class="link"/>
+    <rect x="664" y="142" width="184" height="158" rx="18" class="panel"/>
+    <text x="682" y="178" class="step">04 · 託管</text>
+    <text x="682" y="222" class="label" style="font-size:20px">GitHub Pages</text>
+    <text x="682" y="266" class="small">託管靜態檔案</text>
+    <path d="M 850 221 H 867" class="link"/>
+    <rect x="872" y="142" width="184" height="158" rx="18" class="panel"/>
+    <text x="890" y="178" class="step">05 · 閱讀</text>
+    <text x="890" y="222" class="label">讀者瀏覽器</text>
+    <text x="890" y="266" class="small">開啟文章與搜尋</text>
+  </g>
+  <rect x="40" y="336" width="1016" height="242" rx="20" fill="#f0f3ed"/>
+  <text x="64" y="380" class="label">Actions 的建置工作</text>
+  <text x="64" y="421" class="small">在 GitHub 的執行環境完成，下列步驟成功後才發布。</text>
+  <g fill="#fff" stroke="#d9e2db" stroke-width="1.5">
+    <rect x="64" y="447" width="212" height="58" rx="12"/>
+    <rect x="292" y="447" width="212" height="58" rx="12"/>
+    <rect x="520" y="447" width="248" height="58" rx="12"/>
+    <rect x="784" y="447" width="248" height="58" rx="12"/>
+  </g>
+  <text x="84" y="484" class="small">1. 安裝鎖定的套件</text>
+  <text x="312" y="484" class="small">2. 型別與內容檢查</text>
+  <text x="540" y="484" class="small">3. 產生靜態網站檔案</text>
+  <text x="804" y="484" class="small">4. 建立 Pagefind 索引</text>
+  <text x="64" y="549" class="small">發布產物：dist/（頁面、樣式、腳本、圖片與搜尋索引）</text>
+  <text x="40" y="625" class="small">讀者取得靜態檔案；這個部落格不需要自己的資料庫或常駐 Node.js 伺服器。</text>
+</svg>

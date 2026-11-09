@@ -147,3 +147,16 @@ vite.config.ts.timestamp-*
 
 # Turbo Repo
 .turbo
+
+# Generated search index; regenerated from public content at build time.
+/public/pagefind/
+
+# Credentials and local-only material must never enter Git history.
+*.pem
+*.key
+*.p12
+*.pfx
+credentials*.json
+service-account*.json
+/private-notes/
+/.local/

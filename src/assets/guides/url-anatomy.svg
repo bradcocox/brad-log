@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="660" viewBox="0 0 1100 660" role="img" aria-labelledby="title desc">
+  <title id="title">GitHub Pages 專案網站的 site、base 與文章路徑</title>
+  <desc id="desc">以 https://example.github.io/your-blog/posts/first-post/ 為例，site 使用來源網址 https://example.github.io，base 是專案子路徑 /your-blog，文章的站內路徑是 /posts/first-post/。發布專案網站時必須讓連結與資源路徑帶入 base。</desc>
+  <defs><style>
+    text{font-family:Inter,"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;fill:#172c3c}
+    .title{font-size:34px;font-weight:750}.sub{font-size:23px;fill:#52645f}.label{font-size:25px;font-weight:700}.body{font-size:22px;fill:#52645f}.code{font-family:"SFMono-Regular",Consolas,monospace;font-size:25px}.value{font-family:"SFMono-Regular",Consolas,monospace;font-size:24px;font-weight:650}.key{font-size:21px;font-weight:750}
+  </style></defs>
+  <rect width="1100" height="660" rx="24" fill="#fbfaf6"/>
+  <text x="40" y="61" class="title">網址拆開看：site、base 與文章路徑</text>
+  <text x="40" y="102" class="sub">以下是 GitHub Pages「專案網站」的網址範例。</text>
+  <rect x="40" y="128" width="1020" height="84" rx="16" fill="#fff" stroke="#d9e2db" stroke-width="2"/>
+  <text x="62" y="181" class="code"><tspan fill="#254c72">https://example.github.io</tspan><tspan fill="#1f6054">/your-blog</tspan><tspan fill="#936330">/posts/first-post/</tspan></text>
+  <g>
+    <rect x="40" y="242" width="324" height="214" rx="18" fill="#edf2f7" stroke="#c8d7e4" stroke-width="2"/>
+    <text x="62" y="280" class="key" fill="#254c72">01 · site</text>
+    <text x="62" y="321" class="label">網站來源網址</text>
+    <text x="62" y="365" class="value" fill="#254c72">https://</text>
+    <text x="62" y="397" class="value" fill="#254c72">example.github.io</text>
+    <text x="62" y="431" class="body">協定 + 網域名稱</text>
+    <rect x="388" y="242" width="324" height="214" rx="18" fill="#e9f3ed" stroke="#c7dbcf" stroke-width="2"/>
+    <text x="410" y="280" class="key" fill="#1f6054">02 · base</text>
+    <text x="410" y="321" class="label">專案的子路徑</text>
+    <text x="410" y="381" class="value" fill="#1f6054">/your-blog</text>
+    <text x="410" y="431" class="body">通常對應 repo 名稱</text>
+    <rect x="736" y="242" width="324" height="214" rx="18" fill="#f7eee0" stroke="#e5d6bb" stroke-width="2"/>
+    <text x="758" y="280" class="key" fill="#936330">03 · post path</text>
+    <text x="758" y="321" class="label">站內文章路徑</text>
+    <text x="758" y="381" class="value" fill="#936330">/posts/first-post/</text>
+    <text x="758" y="431" class="body">隨每一篇文章而變</text>
+  </g>
+  <rect x="40" y="483" width="1020" height="106" rx="16" fill="#172c3c"/>
+  <text x="64" y="525" class="code" fill="#fbfaf6" style="fill:#fbfaf6">site: "https://example.github.io",</text>
+  <text x="64" y="562" class="code" fill="#d5e7d8" style="fill:#d5e7d8">base: "/your-blog",</text>
+  <text x="40" y="630" class="body">站內連結、圖片與搜尋索引也要帶入 base，才能在專案網站的子路徑正常運作。</text>
+</svg>

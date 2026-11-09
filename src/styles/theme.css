@@ -1,0 +1,39 @@
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --font-app:
+    ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+}
+:root,
+[data-theme="light"] {
+  --background: #f8f9f5;
+  --foreground: #24342e;
+  --accent: #23634f;
+  --accent-foreground: #ffffff;
+  --muted: #e9ede5;
+  --muted-foreground: #647168;
+  --border: #dce3d9;
+  --surface: #ffffff;
+  --surface-subtle: #f0f3eb;
+  --accent-soft: #e5eee5;
+  --warm-surface: #f1efe3;
+}
+[data-theme="dark"] {
+  --background: #14201b;
+  --foreground: #e6eee5;
+  --accent: #a1d5b6;
+  --accent-foreground: #14201b;
+  --muted: #25362c;
+  --muted-foreground: #b0bdb0;
+  --border: #34483a;
+  --surface: #1c2a22;
+  --surface-subtle: #233229;
+  --accent-soft: #2a4032;
+  --warm-surface: #31372a;
+}

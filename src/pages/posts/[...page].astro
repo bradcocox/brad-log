@@ -1,0 +1,169 @@
+---
+import { getCollection } from "astro:content";
+import { getRelativeLocaleUrl } from "astro:i18n";
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+import Card from "@/components/Card.astro";
+import { DOMAINS, CONTENT_TYPE_LABELS } from "@/data/domains";
+import { getSortedPosts } from "@/utils/getSortedPosts";
+import config from "@/config";
+export function getStaticPaths() {
+  return [{ params: { page: undefined } }];
+}
+const locale = Astro.currentLocale ?? config.site.lang;
+const posts = getSortedPosts(await getCollection("posts"));
+---
+
+<Layout
+  title={"所有文章 | " + config.site.title}
+  description="依專業領域與文章型態，尋找 Brad 的技術教學、實作與排錯、閱讀紀錄和學習筆記。"
+>
+  <Header />
+  <main id="main-content" class="wide-layout collection-main">
+    <nav class="breadcrumbs" aria-label="所在位置">
+      <a href={getRelativeLocaleUrl(locale, "")}>首頁</a><span
+        aria-hidden="true">/</span
+      ><span aria-current="page">所有文章</span>
+    </nav>
+    <header class="collection-header">
+      <p class="eyebrow">THE NOTEBOOK</p><h1>所有文章</h1><p>
+        從一次嘗試，到一份可以回頭查閱的筆記。<br
+        />用領域與文章型態，找到現在用得上的內容。
+      </p>
+    </header>
+    <form id="post-filters" class="post-filters" hidden>
+      <label
+        >專業領域<select name="category"
+          ><option value="">全部領域</option>{
+            DOMAINS.map(domain => (
+              <option value={domain.id}>{domain.name}</option>
+            ))
+          }</select
+        ></label
+      >
+      <label
+        >文章型態<select name="type"
+          ><option value="">全部型態</option>{
+            Object.entries(CONTENT_TYPE_LABELS).map(([value, label]) => (
+              <option value={value}>{label}</option>
+            ))
+          }</select
+        ></label
+      >
+      <label
+        >排序方式<select name="sort"
+          ><option value="updated">最近更新</option><option value="newest"
+            >最新發佈</option
+          ><option value="oldest">最早發佈</option></select
+        ></label
+      >
+    </form>
+    <noscript
+      ><p class="collection-tip">
+        你可以從 <a href={getRelativeLocaleUrl(locale, "categories")}
+          >專業領域</a
+        > 頁面瀏覽分類筆記。
+      </p></noscript
+    >
+    <div class="list-summary">
+      <p id="post-count" aria-live="polite">
+        <strong>{posts.length}</strong> 篇筆記
+      </p><a class="text-link" href={getRelativeLocaleUrl(locale, "search")}
+        >搜尋內文 <span aria-hidden="true">→</span></a>
+    </div>
+    <ul id="post-list" class="post-grid">
+      {posts.map(post => <Card {...post} />)}
+    </ul>
+    <section id="filter-empty" class="empty-state" hidden>
+      <h2>這個組合，還沒有筆記。</h2><p>
+        換個領域或文章型態，看看其他學習紀錄。
+      </p><button type="button" id="reset-filters" class="primary-button"
+        >清除篩選</button>
+    </section>
+    {
+      !posts.length && (
+        <section class="empty-state">
+          <>
+            <h2>第一篇筆記，正在路上。</h2>
+            <p>整理完成後，會出現在這裡。</p>
+          </>
+        </section>
+      )
+    }
+  </main>
+  <Footer />
+</Layout>
+<script>
+  function setupPostFilters() {
+    const form = document.querySelector<HTMLFormElement>("#post-filters");
+    const list = document.querySelector<HTMLUListElement>("#post-list");
+    if (!form || !list || form.dataset.ready) return;
+    form.dataset.ready = "true";
+    const category = form.elements.namedItem("category") as HTMLSelectElement;
+    const type = form.elements.namedItem("type") as HTMLSelectElement;
+    const sort = form.elements.namedItem("sort") as HTMLSelectElement;
+    const cards = Array.from(
+      list.querySelectorAll<HTMLElement>("[data-post-card]")
+    );
+    const count = document.querySelector("#post-count");
+    const empty = document.querySelector<HTMLElement>("#filter-empty");
+    const params = new URLSearchParams(location.search);
+    for (const [name, select] of [
+      ["category", category],
+      ["type", type],
+      ["sort", sort],
+    ] as const) {
+      const value = params.get(name);
+      if (
+        value !== null &&
+        Array.from(select.options).some(option => option.value === value)
+      )
+        select.value = value;
+    }
+    const update = () => {
+      let visible = 0;
+      const dateKey = sort.value === "updated" ? "updated" : "published";
+      cards.sort(
+        (a, b) =>
+          (Number(b.dataset[dateKey]) - Number(a.dataset[dateKey])) *
+          (sort.value === "oldest" ? -1 : 1)
+      );
+      for (const card of cards) {
+        const matches =
+          (!category.value || card.dataset.category === category.value) &&
+          (!type.value || card.dataset.contentType === type.value);
+        card.hidden = !matches;
+        if (matches) visible++;
+        list.append(card);
+      }
+      if (count)
+        count.textContent =
+          visible +
+          " 篇筆記" +
+          (visible !== cards.length ? "，共 " + cards.length + " 篇" : "");
+      if (empty) empty.hidden = visible > 0 || cards.length === 0;
+      const url = new URL(location.href);
+      for (const [name, value] of [
+        ["category", category.value],
+        ["type", type.value],
+        ["sort", sort.value === "updated" ? "" : sort.value],
+      ]) {
+        if (value) url.searchParams.set(name, value);
+        else url.searchParams.delete(name);
+      }
+      history.replaceState(null, "", url);
+      sessionStorage.setItem("backUrl", url.pathname + url.search);
+    };
+    form.hidden = false;
+    form.addEventListener("change", update);
+    form.addEventListener("submit", event => event.preventDefault());
+    document.querySelector("#reset-filters")?.addEventListener("click", () => {
+      form.reset();
+      update();
+    });
+    update();
+  }
+  setupPostFilters();
+  document.addEventListener("astro:page-load", setupPostFilters);
+</script>
