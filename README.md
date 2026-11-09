@@ -41,7 +41,7 @@ Settings → Pages → Source 選擇 GitHub Actions。推送 main 後執行 `.gi
 
 2026-11-09 已透過本機 Chrome 確認 Workers **Free、$0**，完成 D1、Turnstile 與 [正式 Worker](https://brad-log-community.bradcocox.workers.dev) 的 Production 配置。D1 應用程式 schema 為 8 個資料表、6 個索引、3 個觸發器；本次沒有付款、綁卡、安裝 GitHub App 或建立 PAT。**前後端已上線，主要功能已在正式網站驗證**：真實統計、Turnstile、按讚後重新整理與取消、匿名留言送出、先審後發，以及桌機／手機版面。
 
-Turnstile 載入修正的 [run 42597413477](https://github.com/bradcocox/brad-log/actions/runs/42597413477) 與手機目錄避讓修正的 [run 42598765590](https://github.com/bradcocox/brad-log/actions/runs/42598765590) 均成功；手機互動區的送出按鈕已確認不被浮動目錄遮住。QA 留言在驗證批准／拒絕流程後已隱藏，未留在公開列表。本次瀏覽器仍有 GitHub 登入狀態，但網站互動沒有要求 GitHub 登入或使用其驗證流程；未另做登出／無痕測試。實測證據、Cron 待觀察的執行紀錄及其他未測範圍見 [互動手冊第 13 節](docs/ENGAGEMENT_SETUP.md#13-正式驗證紀錄) 與 [部署狀態](docs/DEPLOYMENT_STATUS.md)。
+Turnstile 載入修正的 [run 42597413477](https://github.com/bradcocox/brad-log/actions/runs/42597413477) 與手機目錄避讓修正的 [run 42598765590](https://github.com/bradcocox/brad-log/actions/runs/42598765590) 均成功；手機互動區的送出按鈕已確認不被浮動目錄遮住。QA 留言在驗證批准／拒絕流程後已隱藏，未留在公開列表。定時清理另已觀察到過期 presence 清除的資料層結果；Cron Events 列表尚未顯示紀錄。本次瀏覽器仍有 GitHub 登入狀態，但網站互動沒有要求 GitHub 登入或使用其驗證流程；未另做登出／無痕測試。完整證據及未測範圍見 [互動手冊第 13 節](docs/ENGAGEMENT_SETUP.md#13-正式驗證紀錄) 與 [部署狀態](docs/DEPLOYMENT_STATUS.md)。
 
 本次採 Dashboard 手動部署：在 `backend/` 執行 `npm run migration:console` 產生 D1 Console 可貼上的單行 SQL，並以 `npm run bundle` 產生 Worker 單一 module。兩個秘密只放 Production 的 Encrypted secrets。**`backend/wrangler.jsonc` 仍是關閉、含 D1 placeholder 的起始模板，不能直接用它覆蓋正式環境。**
 

@@ -10,7 +10,7 @@
 
 Turnstile 載入修正 [946e30e](https://github.com/bradcocox/brad-log/commit/946e30e1e93d0e7b35c80b9c45530f87ad1dc23c) 的 [run 42597413477](https://github.com/bradcocox/brad-log/actions/runs/42597413477) 成功；手機浮動目錄修正 [bf437ae](https://github.com/bradcocox/brad-log/commit/bf437aeffe460b61ba8ef77ee23a6f950da7ea6b) 的 [run 42598765590](https://github.com/bradcocox/brad-log/actions/runs/42598765590) 也成功。正式 1440px／390px 檢視均無整頁水平溢位；390px 下送出按鈕高 44px，互動區不受浮動目錄遮擋，回正文後目錄仍可使用。深色切換保留草稿、要求重新驗證，並已完成實際重新驗證。
 
-實測使用本機 Chrome，其既有 GitHub 登入狀態沒有清除；網站沒有要求 GitHub 登入，也沒有 GitHub OAuth 流程。本輪未另測登出／無痕、DNT／GPC、真正 BFCache 或正式配額耗盡情境。Cron 已配置，實際執行／清理紀錄仍待觀察。這些是驗證範圍與維護限制，主要互動流程已完成；完整證據見 [互動手冊第 13 節](ENGAGEMENT_SETUP.md#13-正式驗證紀錄) 及 [部署狀態](DEPLOYMENT_STATUS.md)。
+實測使用本機 Chrome，其既有 GitHub 登入狀態沒有清除；網站沒有要求 GitHub 登入，也沒有 GitHub OAuth 流程。本輪未另測登出／無痕、DNT／GPC、真正 BFCache 或正式配額耗盡情境。Cron 已配置，資料層已觀察到過期 presence 清除；事件列表尚無紀錄，未核對確切執行時間或實際等待 48 小時／30 天期限。這些是驗證範圍與維護限制，主要互動流程已完成；完整證據見 [互動手冊第 13 節](ENGAGEMENT_SETUP.md#13-正式驗證紀錄) 及 [部署狀態](DEPLOYMENT_STATUS.md)。
 
 | 後端設定 | 本次實際值／狀態 |
 | --- | --- |
