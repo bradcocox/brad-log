@@ -1,0 +1,181 @@
+---
+import { isEngagementEnabled } from "@/data/engagement";
+import { getAssetPath } from "@/utils/withBase";
+const articleId = Astro.url.pathname;
+---
+
+{
+  isEngagementEnabled() && (
+    <section
+      class="article-engagement"
+      data-article-engagement
+      data-article-id={articleId}
+      data-pagefind-ignore
+      aria-labelledby="engagement-title"
+    >
+      <div class="engagement-reaction">
+        <div>
+          <p class="engagement-eyebrow">一起留下學習的足跡</p>
+          <h2 id="engagement-title">這篇對你有幫助嗎？</h2>
+          <p class="engagement-description">
+            不需要帳號，也可以給這篇筆記一點回饋。
+          </p>
+        </div>
+        <button
+          type="button"
+          class="engagement-button engagement-like"
+          data-like-button
+          aria-pressed="false"
+          aria-describedby="reaction-note"
+          disabled
+        >
+          <span aria-hidden="true">👍</span>
+          <span data-like-label>對我有幫助</span>
+          <span class="engagement-like-count" data-like-count>
+            —
+          </span>
+        </button>
+      </div>
+      <p id="reaction-note" class="engagement-small">
+        同一瀏覽器可取消回應；清除瀏覽資料後，可能無法辨識之前的選擇。
+      </p>
+      <div class="engagement-challenge" data-like-challenge hidden />
+      <p class="engagement-status" data-like-status role="status" />
+      <button
+        type="button"
+        class="engagement-text-button"
+        data-like-retry
+        hidden
+      >
+        重新讀取回應
+      </button>
+
+      <div class="engagement-discussion" id="comments">
+        <div class="engagement-heading-row">
+          <div>
+            <h2>留言交流</h2>
+            <p class="engagement-description">
+              分享你的實作經驗、疑問，或補充這篇筆記。
+            </p>
+          </div>
+          <button
+            type="button"
+            class="engagement-button"
+            data-comment-open
+            aria-expanded="false"
+            aria-controls="comment-form"
+            disabled
+          >
+            寫下留言
+          </button>
+        </div>
+        <p class="engagement-small" id="comment-policy">
+          不需要登入。留言由 Brad 審核後公開，請勿填寫密碼、API
+          金鑰或個人敏感資訊。
+          <a href={getAssetPath("privacy/")}>閱讀隱私說明</a>
+        </p>
+        <p class="engagement-status" data-comment-status role="status" />
+        <form
+          id="comment-form"
+          class="engagement-form"
+          data-comment-form
+          aria-describedby="comment-policy"
+          hidden
+        >
+          <div class="engagement-field">
+            <label for="comment-nickname">
+              暱稱 <span>（選填）</span>
+            </label>
+            <input
+              id="comment-nickname"
+              name="nickname"
+              type="text"
+              maxlength="32"
+              autocomplete="off"
+              placeholder="留空會顯示「訪客」"
+            />
+          </div>
+          <div class="engagement-field">
+            <label for="comment-body">留言內容</label>
+            <textarea
+              id="comment-body"
+              name="body"
+              rows="6"
+              minlength="2"
+              maxlength="2000"
+              required
+              aria-describedby="comment-format comment-length"
+              placeholder="你想補充什麼，或在哪個步驟遇到了問題？"
+            />
+            <div class="engagement-field-hints">
+              <span id="comment-format">純文字，至少 2 字；送出後待審核。</span>
+              <span id="comment-length" data-comment-length>
+                0 / 2,000 字
+              </span>
+            </div>
+          </div>
+          <div class="engagement-honeypot" aria-hidden="true">
+            <label for="comment-website">請留空</label>
+            <input
+              id="comment-website"
+              name="website"
+              type="text"
+              tabindex="-1"
+              autocomplete="off"
+            />
+          </div>
+          <p class="engagement-small">
+            開啟表單後會載入 Cloudflare Turnstile，協助阻擋垃圾留言。
+          </p>
+          <div class="engagement-challenge" data-comment-challenge hidden />
+          <p class="engagement-status" data-verification-status role="status" />
+          <div class="engagement-form-actions">
+            <button
+              type="submit"
+              class="engagement-button engagement-button-primary"
+              data-comment-submit
+              disabled
+            >
+              送出留言，等待審核
+            </button>
+            <button
+              type="button"
+              class="engagement-text-button"
+              data-comment-verify-retry
+              hidden
+            >
+              重新驗證
+            </button>
+          </div>
+        </form>
+        <div class="engagement-comments" aria-busy="true" data-comments-region>
+          <p class="engagement-small" data-comments-status role="status">
+            正在讀取留言
+          </p>
+          <ol class="engagement-comment-list" data-comments-list />
+          <button
+            type="button"
+            class="engagement-text-button"
+            data-comments-retry
+            hidden
+          >
+            重新讀取留言
+          </button>
+          <button
+            type="button"
+            class="engagement-button"
+            data-comments-more
+            hidden
+          >
+            載入更多留言
+          </button>
+        </div>
+      </div>
+      <noscript>
+        <p class="engagement-small">
+          按讚、留言與即時統計需要啟用 JavaScript。文章內容仍可正常閱讀。
+        </p>
+      </noscript>
+    </section>
+  )
+}

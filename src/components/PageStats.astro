@@ -1,0 +1,27 @@
+---
+import { isEngagementEnabled } from "@/data/engagement";
+---
+
+{
+  isEngagementEnabled() && (
+    <aside
+      class="page-stats engagement-stats"
+      aria-label="文章訪問統計"
+      aria-busy="true"
+      data-stats-group
+      data-pagefind-ignore
+    >
+      <span>
+        累積訪問 <strong data-stat="pageVisits">—</strong>
+      </span>
+      <span>
+        <span data-active-label>近 2 分鐘活躍（估計）</span>
+        <strong data-stat="pageActive">—</strong>
+      </span>
+      <a href="#comments">前往留言</a>
+      <span class="engagement-stats-note" data-stats-status>
+        正在讀取統計
+      </span>
+    </aside>
+  )
+}

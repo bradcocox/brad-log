@@ -3,6 +3,7 @@ import { ClientRouter } from "astro:transitions";
 import { resolveDefaultOgImagePath } from "@/utils/resolveDefaultOgImagePath";
 import { getAssetPath } from "@/utils/withBase";
 import config from "@/config";
+import EngagementRuntime from "@/components/EngagementRuntime.astro";
 import "@/styles/global.css";
 import "@/styles/article.css";
 
@@ -111,6 +112,7 @@ const rssHref = getAssetPath("rss.xml");
     class="bg-background font-app text-foreground selection:bg-accent/75 selection:text-accent-foreground flex min-h-svh flex-col"
   >
     <slot />
+    <EngagementRuntime />
     <script>
       import "@/scripts/theme";
     </script>

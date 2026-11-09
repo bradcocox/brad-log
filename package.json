@@ -9,7 +9,9 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "build": "node scripts/check-public.mjs --source && astro check && astro build && pagefind --site dist && node copy-pagefind.mjs && node scripts/check-public.mjs --dist",
+    "build": "node scripts/check-public.mjs --source && node --test backend/test/worker.test.mjs && astro check && astro build && pagefind --site dist && node copy-pagefind.mjs && node scripts/generate-engagement-manifest.mjs && node scripts/check-public.mjs --dist",
+    "engagement:manifest": "node scripts/generate-engagement-manifest.mjs --update-fallback",
+    "test:community": "node --test backend/test/worker.test.mjs",
     "security:check": "node scripts/check-public.mjs --source",
     "preview": "astro preview",
     "sync": "astro sync",

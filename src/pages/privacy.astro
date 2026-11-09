@@ -1,0 +1,126 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+import Main from "@/components/Main.astro";
+import Breadcrumb from "@/components/Breadcrumb.astro";
+import { isEngagementEnabled } from "@/data/engagement";
+---
+
+<Layout
+  title="隱私與互動說明 | Brad.log"
+  description="Brad.log 的匿名統計、按讚、留言與資料保留方式。"
+>
+  <Header />
+  <Breadcrumb />
+  <Main pageTitle="隱私與互動說明" class="app-prose privacy-page">
+    <p>
+      更新日期：2026 年 11 月 9
+      日。這裡說明本站如何處理匿名統計、文章回應與留言。閱讀文章不需要註冊，也不需要
+      GitHub 帳號。
+    </p>
+    {
+      !isEngagementEnabled() && (
+        <aside class="privacy-status" aria-label="目前服務狀態">
+          <strong>互動服務尚未啟用。</strong>
+          本站目前不會傳送下述匿名統計，也不會載入留言驗證服務。以下是功能正式啟用時採用的資料處理方式。
+        </aside>
+      )
+    }
+    <h2>我們記錄什麼？</h2>
+    <p>
+      歷史統計保留每頁與每日的彙總瀏覽次數。每次進入頁面計一次；同一個請求重試不重複計入。這個數字不等於不重複的真人數，也不會補算啟用之前的歷史。
+    </p>
+    <p>
+      「近 2 分鐘活躍」依照可見分頁的短期回報估計，約每 60
+      秒更新。同一瀏覽器的多個分頁在全站統計中盡量去重；不同瀏覽器或裝置仍可能被分開計算。公開
+      API 只提供合計，不提供個別訪客或正在閱讀的頁面清單。
+    </p>
+    <p>
+      統計不傳送網址查詢參數、頁面片段、搜尋字詞或來源網址。當瀏覽器傳送 Do Not
+      Track 或 Global Privacy Control
+      訊號時，本站停止自動統計回報；你仍可主動使用按讚與留言。
+    </p>
+    <h2>按讚與留言不需要帳號</h2>
+    <p>
+      按讚使用儲存在瀏覽器的隨機代碼，避免同一瀏覽器重複計數，並支援取消。這個代碼不是登入憑證，也不能保證每個真人只參與一次；清除瀏覽資料或更換裝置可能重新計數。
+    </p>
+    <p>
+      留言只收選填暱稱與留言正文，不要求
+      Email、個人網址或上傳圖片。空白暱稱會顯示「訪客」。留言先由 Brad
+      審核，通過後公開顯示暱稱、內容與時間。請不要張貼密碼、金鑰、私人聯絡方式或其他人的個人資料。
+    </p>
+    <p>
+      留言以純文字呈現，不執行訪客提供的 HTML
+      或程式碼。要更正或移除自己的留言，可透過公開 GitHub
+      專案提供該留言的文章網址與時間，或在原文章另留一則更正請求；請勿在公開管道補貼敏感資料。
+    </p>
+    <h2>瀏覽器儲存與第三方服務</h2>
+    <p>
+      本站保留原有的深淺色偏好。互動功能啟用後，瀏覽器另外保存每日輪替的匿名統計代碼，以及按讚使用的隨機代碼。清除本站的瀏覽器儲存空間即可移除這些本機資料。
+    </p>
+    <p>
+      文章託管於 GitHub Pages。互動 API 與資料庫由 Cloudflare Workers、D1
+      提供。主動按讚或留言時才載入 Cloudflare Turnstile 防垃圾驗證；這會連線至
+      Cloudflare，服務商會依其政策處理必要的網路與安全資訊。匿名互動不代表網路服務完全接觸不到
+      IP。
+    </p>
+    <p>
+      本站後端會短暫使用連線 IP 進行限流，保存的是每日輪替的加密摘要，不把原始
+      IP、完整瀏覽器資訊或查詢參數寫入應用程式資料庫。本站不加入廣告追蹤、第三方頭像或跨站追蹤工具。
+    </p>
+    <ul>
+      <li>
+        <a
+          href="https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages#data-collection"
+          target="_blank"
+          rel="noopener noreferrer">GitHub Pages 的資料蒐集說明</a>
+      </li>
+      <li>
+        <a
+          href="https://www.cloudflare.com/privacypolicy/"
+          target="_blank"
+          rel="noopener noreferrer">Cloudflare 隱私政策</a>
+      </li>
+      <li>
+        <a
+          href="https://www.cloudflare.com/turnstile-privacy-policy/"
+          target="_blank"
+          rel="noopener noreferrer">Cloudflare Turnstile 隱私說明</a>
+      </li>
+    </ul>
+    <h2>資料保留與服務限制</h2>
+    <p>
+      在線狀態資料超過 10 分鐘即列入清理；瀏覽重試去重紀錄與限流摘要保留約 48
+      小時。待審核留言超過 30
+      天可清理，已核准留言、按讚和彙總統計持續保留至維護或刪除。清理由排程執行；服務故障或免費額度耗盡時，實際清除時間可能延後。
+    </p>
+    <p>
+      本站僅使用免費方案。互動服務暫停或超過額度時，文章、分類、搜尋與導覽仍可閱讀；統計與互動會顯示暫時無法使用。沒有取得資料時，不會以
+      0 冒充實際結果。
+    </p>
+    <p>
+      <a
+        href="https://github.com/bradcocox/brad-log"
+        target="_blank"
+        rel="noopener noreferrer">查看 Brad.log 公開原始碼與維護文件</a>
+    </p>
+  </Main>
+  <Footer />
+</Layout>
+
+<style>
+  .privacy-page {
+    min-width: 0;
+  }
+  .privacy-status {
+    margin-block: 1.5rem;
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+    background: var(--muted);
+  }
+  .privacy-status strong {
+    display: block;
+  }
+</style>

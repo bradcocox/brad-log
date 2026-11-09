@@ -1,0 +1,42 @@
+---
+import { isEngagementEnabled } from "@/data/engagement";
+import { getAssetPath } from "@/utils/withBase";
+type Props = { showPageStats?: boolean };
+const { showPageStats = true } = Astro.props;
+const isNotFound = /\/404(?:\.html)?\/?$/.test(Astro.url.pathname);
+---
+
+{
+  isEngagementEnabled() && !isNotFound && (
+    <aside
+      class="site-stats engagement-stats"
+      aria-label={showPageStats ? "網站與本頁訪問統計" : "全站訪問統計"}
+      aria-busy="true"
+      data-stats-group
+      data-pagefind-ignore
+    >
+      {showPageStats && (
+        <>
+          <span>
+            本頁累積訪問 <strong data-stat="pageVisits">—</strong>
+          </span>
+          <span>
+            本頁<span data-active-label>近 2 分鐘活躍（估計）</span>
+            <strong data-stat="pageActive">—</strong>
+          </span>
+        </>
+      )}
+      <span>
+        全站累積訪問 <strong data-stat="siteVisits">—</strong>
+      </span>
+      <span>
+        全站<span data-active-label>近 2 分鐘活躍（估計）</span>
+        <strong data-stat="siteActive">—</strong>
+      </span>
+      <a href={getAssetPath("privacy/")}>統計與隱私說明</a>
+      <span class="engagement-stats-note" data-stats-status>
+        正在讀取統計
+      </span>
+    </aside>
+  )
+}

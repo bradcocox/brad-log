@@ -28,13 +28,14 @@ const rules = [
   ["API credential", /\bsk-(?:proj-|ant-api[0-9]{2}-)?[A-Za-z0-9_-]{30,}\b/g],
   ["credential in URL", /https?:\/\/[^\s/:"'<>]+:[^\s/@"'<>]+@/g],
   ["secret assignment", /(?:api[_-]?key|access[_-]?token|client[_-]?secret|password)\s*[:=]\s*["']([A-Za-z0-9+_/=.-]{20,})["']/gi],
+  ["community backend secret", /(?:signing[_-]?secret|turnstile[_-]?secret|cloudflare[_-]?api[_-]?token)\s*[:=]\s*["']([A-Za-z0-9+_/=.-]{20,})["']/gi],
 ];
-const forbiddenName = /(?:^|\/)(?:\.env(?:\..+)?|credentials[^/]*\.json|service-account[^/]*\.json|[^/]+\.(?:pem|key|p12|pfx))$/i;
+const forbiddenName = /(?:^|\/)(?:\.env(?:\..+)?|\.dev\.vars(?:\..+)?|credentials[^/]*\.json|service-account[^/]*\.json|[^/]+\.(?:pem|key|p12|pfx|sqlite(?:-shm|-wal)?))$|(?:^|\/)\.wrangler\//i;
 const findings = [];
 let scanned = 0;
 for (const file of files) {
   if (!existsSync(file) || !statSync(file).isFile()) continue;
-  if (forbiddenName.test(file) && !file.endsWith(".env.example")) findings.push(`${file}: forbidden credential filename`);
+  if (forbiddenName.test(file) && !file.endsWith(".env.example") && !file.endsWith(".dev.vars.example")) findings.push(`${file}: forbidden credential filename`);
   const buffer = readFileSync(file);
   if (buffer.includes(0)) continue;
   const content = buffer.toString("utf8");

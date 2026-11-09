@@ -16,6 +16,8 @@ import BackToTopButton from "./_components/BackToTopButton.astro";
 import AdjacentPostNav from "./_components/AdjacentPostNav.astro";
 import PostToc from "./_components/PostToc.astro";
 import ArticleTables from "@/components/ArticleTables.astro";
+import PageStats from "@/components/PageStats.astro";
+import ArticleEngagement from "@/components/ArticleEngagement.astro";
 import config from "@/config";
 import { getRelativeLocaleUrl } from "astro:i18n";
 import {
@@ -167,6 +169,7 @@ const ogImage = ogImageUrl
             </span>
             <EditPost {hideEditPost} {post} class="max-sm:hidden" />
           </div>
+          <PageStats />
         </header>
         <article
           id="article"
@@ -179,6 +182,7 @@ const ogImage = ogImageUrl
           <Content />
         </article>
         <ArticleTables />
+        <ArticleEngagement />
         <div class="post-end">
           <hr class="my-8 border-dashed" />
 
@@ -211,7 +215,7 @@ const ogImage = ogImageUrl
       <PostToc headings={tocHeadings} />
     </div>
   </main>
-  <Footer />
+  <Footer showPageStats={false} />
 </PostLayout>
 
 <script is:inline data-astro-rerun>

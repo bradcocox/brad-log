@@ -1,0 +1,22 @@
+---
+import { engagementConfig, isEngagementEnabled } from "@/data/engagement";
+import "@/styles/engagement.css";
+
+const isNotFound = /\/404(?:\.html)?\/?$/.test(Astro.url.pathname);
+---
+
+{
+  isEngagementEnabled() && !isNotFound && (
+    <div
+      hidden
+      data-engagement-config
+      data-api-base={engagementConfig.apiBase.replace(/\/+$/, "")}
+      data-site-key={engagementConfig.turnstileSiteKey}
+      data-page-id={Astro.url.pathname}
+    />
+  )
+}
+
+<script>
+  import "@/scripts/engagement";
+</script>

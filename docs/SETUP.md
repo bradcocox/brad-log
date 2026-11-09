@@ -2,6 +2,12 @@
 
 本文件保存可重現的設定、位置、原因與驗證方式。公開教學位於 `src/content/posts/github-pages-astropaper-guide.md`。所有真實密碼、API key、登入 cookie、私鑰與個人 Token 都不得寫入本文件或 Git 歷史。
 
+## 匿名互動與零費用原則
+
+2026-11-09 新增的互動模組採 Cloudflare Workers Free、D1 Free 與 Turnstile Free，讀者不需要 GitHub 或 Cloudflare 帳號。架構、所有設定、統計口徑、資料保留、審核與啟用步驟集中保留在 [匿名互動設定手冊](ENGAGEMENT_SETUP.md)。免費額度用盡時停止 API，不切換付費方案。本文其餘 GitHub Pages 與文章設定繼續適用。
+
+初始前端 `engagementConfig.enabled` 與後端 `FEATURES_ENABLED` 均為關閉；未完成真實免費帳戶設定與連線驗證前，不對外顯示未接通的按鈕或假數字。網站的 `/privacy/` 會依設定說明目前狀態。每次 `pnpm build` 會把實際發布頁面清單輸出成 `dist/engagement-pages.json`；後端驗證新文章時讀取固定本站網址，最多快取五分鐘。
+
 ## 1. 專案來源與版本
 
 | 項目 | 本次設定 | 設定／查核位置 | 原因與驗證 |

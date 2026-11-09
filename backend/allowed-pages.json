@@ -1,0 +1,26 @@
+{
+  "pages": [
+    "/brad-log/",
+    "/brad-log/about/",
+    "/brad-log/archives/",
+    "/brad-log/categories/",
+    "/brad-log/categories/ai-llm/",
+    "/brad-log/categories/backend-api/",
+    "/brad-log/categories/data-engineering/",
+    "/brad-log/categories/developer-tools/",
+    "/brad-log/categories/devops-cloud/",
+    "/brad-log/categories/system-design/",
+    "/brad-log/posts/",
+    "/brad-log/posts/github-pages-astropaper-guide/",
+    "/brad-log/privacy/",
+    "/brad-log/search/",
+    "/brad-log/tags/",
+    "/brad-log/tags/astro/",
+    "/brad-log/tags/astropaper/",
+    "/brad-log/tags/github-actions/",
+    "/brad-log/tags/github-pages/"
+  ],
+  "articles": [
+    "/brad-log/posts/github-pages-astropaper-guide/"
+  ]
+}

@@ -3,8 +3,17 @@ import { getRelativeLocaleUrl } from "astro:i18n";
 import type { HTMLAttributes } from "astro/types";
 import { getAssetPath } from "@/utils/withBase";
 import config from "@/config";
-type Props = HTMLAttributes<"footer"> & { noMarginTop?: boolean };
-const { noMarginTop, class: className, ...attrs } = Astro.props;
+import SiteStats from "@/components/SiteStats.astro";
+type Props = HTMLAttributes<"footer"> & {
+  noMarginTop?: boolean;
+  showPageStats?: boolean;
+};
+const {
+  noMarginTop,
+  showPageStats = true,
+  class: className,
+  ...attrs
+} = Astro.props;
 const locale = Astro.currentLocale ?? config.site.lang;
 ---
 
@@ -23,18 +32,21 @@ const locale = Astro.currentLocale ?? config.site.lang;
       <a href={getRelativeLocaleUrl(locale, "tags")}>技術標籤</a>
       <a href={getRelativeLocaleUrl(locale, "archives")}>學習時間軸</a>
       <a href={getAssetPath("rss.xml")}>RSS</a>
+      <a href={getAssetPath("privacy/")}>隱私與互動</a>
       <a
         href="https://github.com/bradcocox/brad-log"
         target="_blank"
         rel="noopener noreferrer">GitHub ↗</a
       >
     </nav>
+    <SiteStats {showPageStats} />
     <p class="footer-credit">
       © {new Date().getFullYear()} Brad <span aria-hidden="true">·</span> Built with
       <a
         href="https://github.com/satnaing/astro-paper"
         target="_blank"
-        rel="noopener noreferrer">AstroPaper</a>
+        rel="noopener noreferrer">AstroPaper</a
+      >
     </p>
   </div>
 </footer>

@@ -1,0 +1,10 @@
+{
+  "name": "brad-log-community-api",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/worker.test.mjs",
+    "bundle": "node scripts/bundle.mjs"
+  },
+  "engines": { "node": ">=24" }
+}
