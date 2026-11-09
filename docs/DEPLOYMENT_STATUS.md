@@ -77,6 +77,13 @@
 - 已通過 18 項 Node 24＋SQLite 的實際 SQL/API 測試，涵蓋資料去重、並發重試、匿名在線去重、按讚取消、審核可見範圍、Turnstile 驗證條件、CORS、大小限制、限流、清理及頁面允許清單。
 - `pnpm build` 納入這組後端測試，再執行 Astro 檢查、靜態輸出與公開內容掃描；本機 Astro 檢查 80 檔案無 errors／warnings／hints，輸出 20 個靜態頁面與 19 頁／1 篇文章的公開互動允許清單。
 - 新增 `/privacy/`，明確顯示互動尚未啟用及預定資料處理方式。未設定服務時，文章上不顯示無法使用的按鈕，也不傳送統計與 Turnstile 請求。
+- 正式靜態發布 commit 為 [`11104f1`](https://github.com/bradcocox/brad-log/commit/11104f1e445b6c854156701932858de6e7321338)；[run 42591023407](https://github.com/bradcocox/brad-log/actions/runs/42591023407) 的 build 與 deploy 均成功，正式 workflow 已恢復最小權限的 `Publish Brad.log`。
+- 本機 Chrome 已開啟正式 `/privacy/`，確認一般視窗（981px）及 390px 手機寬度沒有整頁水平溢位，服務狀態清楚顯示尚未啟用；DOM 中沒有互動設定根節點或 Turnstile script。實拍見下方，手機檢查後已恢復原視窗設定。
+- 正式首篇文章的 6 張表格仍存在，本輪一般視窗檢查沒有整頁水平溢位，頁尾新增隱私說明入口。此項只確認目前關閉互動時的基本回歸，不代表已完成啟用後的互動或全部裝置驗證。
 - 本機測試不能替代正式 Cloudflare D1／Turnstile、實際 CPU／配額、桌機與手機互動驗證。這些項目需在使用者登入免費帳戶、完成設定後再確認；本段不宣稱互動功能已正式上線。
+
+![正式隱私頁明確標示互動尚未啟用](ui-review/community/02-privacy-disabled.jpg)
+
+![390px 手機寬度的隱私說明頁](ui-review/community/03-privacy-mobile.jpg)
 
 已保存不含帳密的 [Cloudflare 登入頁實拍](ui-review/community/01-cloudflare-sign-in.jpg)，並在設定手冊說明目前待完成的步驟。後續 Pages 發布結果以 [Publish Brad.log](https://github.com/bradcocox/brad-log/actions/workflows/deploy.yml) 的正式紀錄為準；動態服務啟用須另外明確記錄，不以靜態網站部署成功代替。

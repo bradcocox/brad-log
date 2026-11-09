@@ -15,11 +15,11 @@
 | 前端開關 | `enabled: false` | 關閉時不載入互動介面，也不發送統計或 Turnstile 請求 |
 | 後端開關 | `FEATURES_ENABLED: "false"` | 通過後端與正式來源驗證後才開啟 |
 | 後端本機測試 | 18 項 SQLite／API 測試通過，主流程已複核 | 不等同 Cloudflare 或真實 Turnstile 整合通過 |
-| 網站建置與正式部署 | 本機建置通過；正式動態服務待配置 | 實際命令結果、commit／部署連結及未驗證範圍 |
+| 網站建置與正式部署 | 本機及 Pages 靜態發布通過；正式動態服務待配置 | 實際命令結果、commit／部署連結及未驗證範圍 |
 
 以下是可重現的設定流程，**不是已完成上線的聲明**。未填入真實 API 網址與 site key、未完成資料庫及秘密設定時，保持兩個開關關閉。不要把範例值或測試成功頁誤認為正式服務。
 
-本輪互動模組原始碼已透過 [來源匯入 run 42590030877](https://github.com/bradcocox/brad-log/actions/runs/42590030877) 保存到 GitHub。靜態網站的發布結果請查看 [Publish Brad.log](https://github.com/bradcocox/brad-log/actions/workflows/deploy.yml)；該流程成功不表示 Cloudflare 資源已建立或互動功能已啟用。
+本輪互動模組原始碼已透過 [來源匯入 run 42590030877](https://github.com/bradcocox/brad-log/actions/runs/42590030877) 保存到 GitHub。[Pages run 42591023407](https://github.com/bradcocox/brad-log/actions/runs/42591023407) 的 build 與 deploy 均成功；正式 `/privacy/` 頁已在本機 Chrome 檢視，明確標示互動尚未啟用。後續發布結果請查看 [Publish Brad.log](https://github.com/bradcocox/brad-log/actions/workflows/deploy.yml)；該流程成功不表示 Cloudflare 資源已建立或互動功能已啟用。
 
 ## 2. 服務分工與資料流
 
