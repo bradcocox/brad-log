@@ -178,7 +178,7 @@ const items = buildTocTree(headings);
     scrollbar-width: thin;
   }
 
-  /* ---- side TOC (hidden below 80rem) ---- */
+  /* ---- side TOC (hidden below 90rem) ---- */
   /* Shows on focus, over the label, so keyboard users can jump to the article. */
   .toc-skip {
     position: absolute;
@@ -228,31 +228,19 @@ const items = buildTocTree(headings);
     display: none;
   }
 
-  /* ---- beside the centred column (>= 80rem) ---- */
-  @media (min-width: 80rem) {
+  /* The table and the TOC occupy separate grid columns on wide screens. */
+  @media (min-width: 90rem) {
+    .post-body:has(.toc-side) {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 15rem;
+      align-items: stretch;
+      gap: 2.5rem;
+    }
     .toc-side {
       display: block;
-      position: absolute;
-      inset-block: 0;
-      inset-inline-start: 100%;
-      /* 100% is the post column, so a customised max-w-app still fits. A wide
-         column leaves little space, so the gaps shrink to give the list more. */
-      --toc-space: calc((100vw - 100%) / 2);
-      --toc-gap: clamp(0.75rem, calc(var(--toc-space) - 14.5rem), 2.5rem);
-      --toc-edge: clamp(0.75rem, calc(var(--toc-space) - 15.5rem), 1.5rem);
-      margin-inline-start: var(--toc-gap);
-      width: min(
-        16rem,
-        calc(var(--toc-space) - var(--toc-gap) - var(--toc-edge))
-      );
-      container-type: inline-size;
-    }
-    /* Too narrow to read, so the floating button takes over. */
-    @container (width < 7.5rem) {
-      .toc-side > nav,
-      .toc-skip {
-        display: none;
-      }
+      position: relative;
+      min-width: 0;
+      padding-block-start: 3rem;
     }
   }
 

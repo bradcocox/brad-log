@@ -259,8 +259,8 @@ const items = withToc ? buildTocTree(headings) : [];
     }
   }
 
-  /* The side TOC takes over from 80rem while it has room (PostToc.astro). */
-  @media (min-width: 80rem) {
+  /* The side TOC takes over from 90rem while it has room (PostToc.astro). */
+  @media (min-width: 90rem) {
     .post-fab:has([data-has-toc]):not([data-side-toc-hidden]) {
       display: none;
     }

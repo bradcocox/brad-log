@@ -15,9 +15,15 @@ import BackButton from "./_components/BackButton.astro";
 import BackToTopButton from "./_components/BackToTopButton.astro";
 import AdjacentPostNav from "./_components/AdjacentPostNav.astro";
 import PostToc from "./_components/PostToc.astro";
+import ArticleTables from "@/components/ArticleTables.astro";
 import config from "@/config";
 import { getRelativeLocaleUrl } from "astro:i18n";
-import { getDomain, CONTENT_TYPE_LABELS, LEVEL_LABELS, STATUS_LABELS } from "@/data/domains";
+import {
+  getDomain,
+  CONTENT_TYPE_LABELS,
+  LEVEL_LABELS,
+  STATUS_LABELS,
+} from "@/data/domains";
 
 export async function getStaticPaths() {
   const posts = await getCollection("posts");
@@ -113,79 +119,97 @@ const ogImage = ogImageUrl
 >
   <Header />
 
-  <BackButton />
-
   <main
     id="main-content"
-    class:list={["app-layout", { "mt-8": !config.features.showBackButton }]}
+    class:list={["post-page", { "pt-8": !config.features.showBackButton }]}
     data-pagefind-body
   >
-    <h1
-      style={{ viewTransitionName: toTransitionName(post.id) }}
-      class="text-foreground inline-block text-2xl leading-relaxed font-bold sm:text-3xl"
-      data-pagefind-meta="title"
-    >
-      {title}
-    </h1>
-    <p class="article-description" data-pagefind-meta="description">{description}</p>
-    <div class="article-meta">
-      <a href={getRelativeLocaleUrl(locale, `categories/${post.data.category}`)} data-pagefind-filter="領域">{domain.name}</a>
-      <span data-pagefind-filter="類型">{CONTENT_TYPE_LABELS[post.data.contentType]}</span>
-      <span>{LEVEL_LABELS[post.data.level]}</span>
-      <span>{STATUS_LABELS[post.data.status]}</span>
-      <span>約 {readingMinutes} 分鐘</span>
-    </div>
+    <div class="post-body">
+      <div class="post-primary">
+        <BackButton />
+        <header class="post-header">
+          <h1
+            style={{ viewTransitionName: toTransitionName(post.id) }}
+            class="text-foreground inline-block text-2xl leading-relaxed font-bold sm:text-3xl"
+            data-pagefind-meta="title"
+          >
+            {title}
+          </h1>
+          <p class="article-description" data-pagefind-meta="description">
+            {description}
+          </p>
+          <div class="article-meta">
+            <a
+              href={getRelativeLocaleUrl(
+                locale,
+                `categories/${post.data.category}`
+              )}
+              data-pagefind-filter="領域">{domain.name}</a
+            >
+            <span data-pagefind-filter="類型"
+              >{CONTENT_TYPE_LABELS[post.data.contentType]}</span
+            >
+            <span>{LEVEL_LABELS[post.data.level]}</span>
+            <span>{STATUS_LABELS[post.data.status]}</span>
+            <span>約 {readingMinutes} 分鐘</span>
+          </div>
 
-    <div class="my-2 flex items-center gap-2">
-      <Datetime {pubDatetime} {modDatetime} {timezone} size="lg" />
-      <span
-        aria-hidden="true"
-        class:list={[
-          "text-muted-foreground max-sm:hidden",
-          { hidden: !config.features.editPost?.enabled || hideEditPost },
-        ]}
-      >
-        |
-      </span>
-      <EditPost {hideEditPost} {post} class="max-sm:hidden" />
-    </div>
+          <div class="post-datetime my-2 flex flex-wrap items-center gap-2">
+            <Datetime {pubDatetime} {modDatetime} {timezone} size="lg" />
+            <span
+              aria-hidden="true"
+              class:list={[
+                "text-muted-foreground max-sm:hidden",
+                { hidden: !config.features.editPost?.enabled || hideEditPost },
+              ]}
+            >
+              |
+            </span>
+            <EditPost {hideEditPost} {post} class="max-sm:hidden" />
+          </div>
+        </header>
+        <article
+          id="article"
+          class:list={[
+            "w-full",
+            "app-prose post-prose",
+            "prose-pre:bg-(--shiki-light-bg) dark:prose-pre:bg-(--shiki-dark-bg)",
+          ]}
+        >
+          <Content />
+        </article>
+        <ArticleTables />
+        <div class="post-end">
+          <hr class="my-8 border-dashed" />
 
-    <div class="post-body mt-8">
-      <PostToc headings={tocHeadings} />
-      <article
-        id="article"
-        class:list={[
-          "w-full",
-          "app-prose max-w-app",
-          "prose-pre:bg-(--shiki-light-bg) dark:prose-pre:bg-(--shiki-dark-bg)",
-        ]}
-      >
-        <Content />
-      </article>
-    </div>
+          <BackToTopButton headings={tocHeadings} />
 
-    <hr class="my-8 border-dashed" />
+          <div
+            class="sm:my-8 sm:flex sm:items-start sm:justify-between sm:gap-8"
+          >
+            <div
+              class="mt-4 mb-8 flex items-start justify-between gap-4 sm:my-0"
+            >
+              <ul class="flex flex-wrap gap-4">
+                {
+                  tags.map(tag => (
+                    <Tag tag={slugifyStr(tag)} tagName={tag} size="sm" />
+                  ))
+                }
+              </ul>
+              <EditPost class="flex-none sm:hidden" {hideEditPost} {post} />
+            </div>
 
-    <BackToTopButton headings={tocHeadings} />
+            <ShareLinks />
+          </div>
 
-    <div class="sm:my-8 sm:flex sm:items-start sm:justify-between sm:gap-8">
-      <div class="mt-4 mb-8 flex items-start justify-between gap-4 sm:my-0">
-        <ul class="flex flex-wrap gap-4">
-          {
-            tags.map(tag => (
-              <Tag tag={slugifyStr(tag)} tagName={tag} size="sm" />
-            ))
-          }
-        </ul>
-        <EditPost class="flex-none sm:hidden" {hideEditPost} {post} />
+          <hr class="my-8 border-dashed" />
+
+          <AdjacentPostNav {prevPost} {nextPost} />
+        </div>
       </div>
-
-      <ShareLinks />
+      <PostToc headings={tocHeadings} />
     </div>
-
-    <hr class="my-8 border-dashed" />
-
-    <AdjacentPostNav {prevPost} {nextPost} />
   </main>
   <Footer />
 </PostLayout>
@@ -248,7 +272,9 @@ const ogImage = ogImageUrl
     const codeBlocks = Array.from(document.querySelectorAll("pre"));
 
     for (const codeBlock of codeBlocks) {
+      if (codeBlock.parentElement?.classList.contains("code-block")) continue;
       const wrapper = document.createElement("div");
+      wrapper.className = "code-block";
       wrapper.style.position = "relative";
 
       const computedStyle = getComputedStyle(codeBlock);
@@ -326,10 +352,7 @@ const ogImage = ogImageUrl
       overlay = document.createElement("div");
       overlay.setAttribute("role", "dialog");
       overlay.setAttribute("aria-modal", "true");
-      overlay.setAttribute(
-        "aria-label",
-        alt ? `圖片預覽：${alt}` : "圖片預覽"
-      );
+      overlay.setAttribute("aria-label", alt ? `圖片預覽：${alt}` : "圖片預覽");
       overlay.className =
         "fixed inset-0 z-50 flex cursor-zoom-out items-center justify-center bg-black/70 backdrop-blur-sm opacity-0 transition-opacity duration-200 motion-reduce:transition-none";
 

@@ -86,6 +86,49 @@ draft: false
 
 領域 ID：`data-engineering`、`backend-api`、`devops-cloud`、`ai-llm`、`system-design`、`developer-tools`。新增領域時，同步修改 DOMAIN_IDS 與 DOMAINS，再建置檢查。領域頁由 `src/pages/categories/[category].astro` 生成，總覽在 `src/pages/categories/index.astro`。沒有已公開文章的分類保持真實空狀態。
 
+### 3.1 文章閱讀版面與表格
+
+這次調整回應「文章過窄、設定表難以閱讀」的實際回饋：文章頁容器、一般段落、圖片／程式碼與資料表分別管理寬度，寬螢幕的目錄使用獨立欄位。以下 px 換算以根字體 16px 為基準；實際 `rem` 尺寸仍會跟隨瀏覽器字體設定。
+
+| 設定位置 | 設定 | 用途與維護注意 |
+| --- | --- | --- |
+| `src/styles/article.css` 的 `.post-page` | `width: 100%`、`max-width: 100rem`，即上限 1600px，含左右 padding | 擴大文章頁可用空間；不可把這個上限直接套在每段正文 |
+| 同上 | `padding-inline: clamp(1.25rem, 3vw, 3rem)` | 左右留白依畫面變化，每側介於 20px 與 48px |
+| `.post-page`、`.post-header`、`.post-end`、一般正文 | `--reading-width: 54rem`，即 864px | 標題資訊、一般段落與文章尾端維持閱讀寬度，並在可用範圍內置中 |
+| `.post-prose` 下的 `pre`、`figure`、`.expressive-code`、`.code-block` 與含圖片的段落 | `max-width: 68rem`，即 1088px | 提供圖解與長程式碼較寬的空間；程式碼複製按鈕的包裹元素使用 `.code-block`，避免被一般段落的 54rem 限制 |
+| `src/pages/posts/[...slug]/index.astro` | `.post-page` → `.post-body` → `.post-primary` | 文章頁的結構入口；表格不受一般段落的 54rem 限制 |
+| `src/pages/posts/[...slug]/_components/PostToc.astro` | `@media (min-width: 90rem)`，約 1440px；有側邊目錄時使用 `grid-template-columns: minmax(0, 1fr) 15rem`，`gap: 2.5rem` | 主內容可收縮，目錄保留 240px，兩欄間隔 40px，避免表格與目錄重疊 |
+| 同上與 `_components/BackToTopButton.astro` | 小於 90rem 時隱藏側邊目錄，使用浮動目錄入口 | 中小螢幕把空間留給正文；修改斷點時須同步兩個元件 |
+| `src/layouts/Layout.astro` | 匯入 `src/styles/article.css` | 閱讀版面樣式入口；列印時取消頁面最大寬度與側邊目錄配置 |
+
+表格的內容仍只在 Markdown 寫一次。建置時由 `src/utils/rehypeTableWrapper.js` 從同一份語法樹生成原生 `<table>` 與逐項閱讀卡片；`src/components/ArticleTables.astro` 負責閱讀方式切換與水平捲動互動，樣式集中在 `src/styles/article-tables.css`。文章頁在正文後載入 `ArticleTables`，不需要逐篇加入額外元件。
+
+| 檔案／位置 | 責任與規則 |
+| --- | --- |
+| `rehypeTableWrapper.js` 的 `describeTable` | 判定是否可安全轉為卡片；單列表頭、欄位一致且沒有合併儲存格的簡單表格才產生兩種閱讀方式。複雜表格保留原生表格 |
+| 同檔的 `addColumnWidths` 與 `--table-min-width` | 管理各欄數的欄寬比及表格最小寬度，具體值列於下表；不在文章內容另寫一份欄寬 |
+| 同檔的表頭與列首處理 | 簡單表格使用 `th scope="col"`、`th scope="row"`，保留真正的表格語意 |
+| 同檔的 `makeRecords` | 第一欄作為每筆資料的標題，其餘欄位使用 `dl`／`dt`／`dd` 顯示明確欄位標籤，避免離開表頭後失去上下文 |
+| 卡片容器與輔助控制 | 設定 `data-pagefind-ignore`；搜尋索引保留原始表格內容，避免同一份資料因卡片副本重複收錄 |
+| `ArticleTables.astro` 與 `article-tables.css` | 每張簡單表格可切換「表格對照」與「逐項閱讀」，按鈕使用 `aria-pressed` 表達目前模式；手機寬度 `<=767px` 預設逐項閱讀，較寬時預設表格對照；同一次頁面閱讀中，手動選擇優先於尺寸變化 |
+| 表格捲動區 | 保留獨立水平捲動區；互動程式依實際溢位顯示左右控制、位置與提示，並尊重減少動畫偏好 |
+| `article-tables.css` 的表格文字與儲存格 | 字級 `1rem`、行高 `1.75`、儲存格 padding `0.85rem 1rem`；長連結與程式碼允許換行，不以縮小文字強塞欄位 |
+| 同檔的逐項閱讀排列 | 預設單欄卡片；畫面 `>=1000px` 時兩欄；列印時逐筆排列並盡量避免卡片跨頁 |
+
+目前欄寬規則已依 `rehypeTableWrapper.js` 核對。百分比適用於可轉卡片的簡單表格；最小寬度保留對照時的閱讀空間，超出可用寬度時只在表格區內水平捲動。
+
+| 欄數 | 各欄比例 | 最小表格寬度 |
+| --- | --- | --- |
+| 2 欄 | 50%、50% | 32rem，約 512px |
+| 3 欄 | 26%、42%、32% | 48rem，約 768px |
+| 4 欄 | 22%、24%、24%、30% | 56rem，約 896px |
+| 5 欄 | 22%、18%、14%、24%、22% | 64rem，約 1024px |
+| 6 欄以上 | 等分 | 每增加一欄加 10rem，即 `64 + (欄數 - 5) × 10` rem |
+
+**無 JavaScript 的預設閱讀方式：** 原生表格與卡片都在建置階段產生，CSS 本身就會依 767px 斷點顯示對應模式；沒有 JavaScript 時仍能閱讀內容，切換與左右捲動按鈕預設隱藏。複雜表格維持可水平捲動的原生表格，不強行轉成卡片。
+
+這一節記錄設計與程式設定，不代表所有尺寸的視覺驗證已完成。修改後需在桌機、平板與手機檢查正文寬度、表格與目錄是否重疊、長路徑是否可讀，以及切換、鍵盤操作、深淺主題與無 JavaScript 時的閱讀結果，再記錄實際驗證結果。
+
 ## 4. GitHub Pages 與 Actions
 
 | 設定入口 | 設定值 | 原因／確認方式 |

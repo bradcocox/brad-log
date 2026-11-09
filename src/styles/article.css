@@ -1,18 +1,120 @@
-.app-prose { line-height: 1.95; overflow-wrap: anywhere; }
-.app-prose h2 { margin-top: 3rem; font-size: 1.6rem; line-height: 1.5; scroll-margin-top: 6rem; }
-.app-prose h3 { font-style: normal; line-height: 1.6; scroll-margin-top: 6rem; }
-.app-prose pre { max-width: 100%; font-size: .84rem; line-height: 1.75; overflow: auto; }
-.app-prose :is(code, pre) { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
-.app-prose img { display: block; width: 100%; height: auto; border-radius: .75rem; background: #fff; }
-.app-prose img + em { display: block; margin-top: .5rem; font-size: .88rem; color: var(--muted-foreground); font-style: normal; line-height: 1.7; }
-.app-prose blockquote { font-style: normal; padding: .85rem 1.25rem; background: var(--muted); border-radius: 0 .5rem .5rem 0; }
-.app-prose .table-wrapper { border-radius: .5rem; }
-.app-prose table { min-width: 36rem; font-size: .88rem; line-height: 1.7; }
-.app-prose th { text-align: start; background: var(--muted); }
-.article-meta { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1rem 0; align-items: center; }
-.article-meta > * { border: 1px solid var(--border); padding: .3rem .65rem; border-radius: 2rem; font-size: .78rem; text-decoration: none; }
-.article-description { color: var(--muted-foreground); line-height: 1.9; margin: 1rem 0; }
+/* Article pages have room for reference material without stretching prose. */
+.post-page {
+  --reading-width: 54rem;
+  width: 100%;
+  max-width: 100rem;
+  margin-inline: auto;
+  padding-inline: clamp(1.25rem, 3vw, 3rem);
+}
+.post-primary {
+  min-width: 0;
+}
+.post-header,
+.article-back,
+.post-end {
+  width: 100%;
+  max-width: var(--reading-width);
+  margin-inline: auto;
+}
+.post-header {
+  margin-bottom: 2.5rem;
+}
+.post-prose {
+  width: 100%;
+  max-width: none;
+}
+.post-prose > :not(.article-table) {
+  max-width: var(--reading-width);
+  margin-inline: auto;
+}
+.post-prose > :is(pre, figure, .expressive-code, .code-block, p:has(> img)) {
+  max-width: 68rem;
+}
+.app-prose {
+  line-height: 1.95;
+  overflow-wrap: anywhere;
+}
+.app-prose h2 {
+  margin-top: 3rem;
+  font-size: 1.6rem;
+  line-height: 1.5;
+  scroll-margin-top: 6rem;
+}
+.app-prose h3 {
+  font-style: normal;
+  line-height: 1.6;
+  scroll-margin-top: 6rem;
+}
+.app-prose pre {
+  max-width: 100%;
+  font-size: 0.94rem;
+  line-height: 1.8;
+  overflow: auto;
+}
+.app-prose :is(code, pre) {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+.app-prose img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 0.75rem;
+  background: #fff;
+}
+.app-prose img + em {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.94rem;
+  color: var(--muted-foreground);
+  font-style: normal;
+  line-height: 1.7;
+}
+.app-prose blockquote {
+  font-style: normal;
+  padding: 0.85rem 1.25rem;
+  background: var(--muted);
+  border-radius: 0 0.5rem 0.5rem 0;
+}
+.article-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1rem 0;
+  align-items: center;
+}
+.article-meta > * {
+  border: 1px solid var(--border);
+  padding: 0.3rem 0.65rem;
+  border-radius: 2rem;
+  font-size: 0.84rem;
+  text-decoration: none;
+}
+.article-description {
+  color: var(--muted-foreground);
+  line-height: 1.9;
+  margin: 1rem 0;
+  font-size: 1.05rem;
+}
+.post-datetime {
+  min-width: 0;
+}
 @media (max-width: 600px) {
-  .app-prose { font-size: 1rem; }
-  .app-prose h2 { font-size: 1.4rem; }
+  .app-prose {
+    font-size: 1rem;
+  }
+  .app-prose h2 {
+    font-size: 1.4rem;
+  }
+  .post-header {
+    margin-bottom: 2rem;
+  }
+}
+@media print {
+  .post-page {
+    max-width: none;
+    padding-inline: 0;
+  }
+  .post-body {
+    display: block !important;
+  }
 }

@@ -1,0 +1,139 @@
+---
+import "@/styles/article-tables.css";
+---
+
+<script>
+  let cleanups: Array<() => void> = [];
+
+  function initArticleTables() {
+    for (const cleanup of cleanups) cleanup();
+    cleanups = [];
+
+    const narrow = matchMedia("(max-width: 767px)");
+    const reduced = matchMedia("(prefers-reduced-motion: reduce)");
+
+    document
+      .querySelectorAll<HTMLElement>("[data-article-table]")
+      .forEach(root => {
+        const viewport = root.querySelector<HTMLElement>(".table-wrapper");
+        const table = viewport?.querySelector<HTMLTableElement>("table");
+        if (!viewport || !table) return;
+        const hasRecords = root.dataset.hasRecords === "true";
+        const switcher = root.querySelector<HTMLElement>("[data-table-switch]");
+        const modeButtons = Array.from(
+          root.querySelectorAll<HTMLButtonElement>("[data-table-mode]")
+        );
+        const controls = root.querySelector<HTMLElement>(
+          "[data-table-scroll-controls]"
+        );
+        const left = root.querySelector<HTMLButtonElement>(
+          '[data-table-scroll="left"]'
+        );
+        const right = root.querySelector<HTMLButtonElement>(
+          '[data-table-scroll="right"]'
+        );
+        const position = root.querySelector<HTMLElement>(
+          "[data-table-position]"
+        );
+        const hint = root.querySelector<HTMLElement>("[data-table-hint]");
+        let chosenView: "table" | "records" | undefined;
+        let frame = 0;
+
+        const updateScroll = () => {
+          frame = 0;
+          const maximum = Math.max(
+            0,
+            viewport.scrollWidth - viewport.clientWidth
+          );
+          const canScroll = viewport.clientWidth > 0 && maximum > 2;
+          root.dataset.overflow = String(canScroll);
+          viewport.tabIndex = canScroll ? 0 : -1;
+          if (controls) controls.hidden = !canScroll;
+          if (hint) hint.hidden = !canScroll;
+          if (hint?.id && canScroll)
+            viewport.setAttribute("aria-describedby", hint.id);
+          else viewport.removeAttribute("aria-describedby");
+          if (left) left.disabled = !canScroll || viewport.scrollLeft <= 1;
+          if (right)
+            right.disabled = !canScroll || viewport.scrollLeft >= maximum - 1;
+          if (position) {
+            const progress =
+              maximum > 0
+                ? Math.round((viewport.scrollLeft / maximum) * 100)
+                : 0;
+            position.textContent =
+              progress <= 0
+                ? "最左側"
+                : progress >= 100
+                  ? "最右側"
+                  : progress + "%";
+          }
+        };
+        const scheduleScroll = () => {
+          if (!frame) frame = requestAnimationFrame(updateScroll);
+        };
+        const setView = () => {
+          const view = hasRecords
+            ? (chosenView ?? (narrow.matches ? "records" : "table"))
+            : "table";
+          root.dataset.tableView = view;
+          modeButtons.forEach(button =>
+            button.setAttribute(
+              "aria-pressed",
+              String(button.dataset.tableMode === view)
+            )
+          );
+          scheduleScroll();
+        };
+        const selectView = (event: Event) => {
+          const mode = (event.currentTarget as HTMLButtonElement).dataset
+            .tableMode;
+          if (mode !== "table" && mode !== "records") return;
+          chosenView = mode;
+          setView();
+        };
+        const moveLeft = () =>
+          viewport.scrollBy({
+            left: -Math.max(240, viewport.clientWidth * 0.7),
+            behavior: reduced.matches ? "auto" : "smooth",
+          });
+        const moveRight = () =>
+          viewport.scrollBy({
+            left: Math.max(240, viewport.clientWidth * 0.7),
+            behavior: reduced.matches ? "auto" : "smooth",
+          });
+
+        modeButtons.forEach(button =>
+          button.addEventListener("click", selectView)
+        );
+        left?.addEventListener("click", moveLeft);
+        right?.addEventListener("click", moveRight);
+        viewport.addEventListener("scroll", scheduleScroll, { passive: true });
+        narrow.addEventListener("change", setView);
+        const observer = new ResizeObserver(scheduleScroll);
+        observer.observe(viewport);
+        observer.observe(table);
+        if (switcher) switcher.hidden = false;
+        setView();
+
+        cleanups.push(() => {
+          cancelAnimationFrame(frame);
+          observer.disconnect();
+          narrow.removeEventListener("change", setView);
+          viewport.removeEventListener("scroll", scheduleScroll);
+          left?.removeEventListener("click", moveLeft);
+          right?.removeEventListener("click", moveRight);
+          modeButtons.forEach(button =>
+            button.removeEventListener("click", selectView)
+          );
+        });
+      });
+  }
+
+  initArticleTables();
+  document.addEventListener("astro:page-load", initArticleTables);
+  document.addEventListener("astro:before-swap", () => {
+    for (const cleanup of cleanups) cleanup();
+    cleanups = [];
+  });
+</script>
