@@ -19,6 +19,8 @@
 
 以下是可重現的設定流程，**不是已完成上線的聲明**。未填入真實 API 網址與 site key、未完成資料庫及秘密設定時，保持兩個開關關閉。不要把範例值或測試成功頁誤認為正式服務。
 
+本輪互動模組原始碼已透過 [來源匯入 run 42590030877](https://github.com/bradcocox/brad-log/actions/runs/42590030877) 保存到 GitHub。靜態網站的發布結果請查看 [Publish Brad.log](https://github.com/bradcocox/brad-log/actions/workflows/deploy.yml)；該流程成功不表示 Cloudflare 資源已建立或互動功能已啟用。
+
 ## 2. 服務分工與資料流
 
 GitHub Pages 繼續提供文章與分類頁。Cloudflare Worker 接收統計及互動請求，透過私有的 D1 binding 存取資料；Turnstile 只用於訪客主動按讚或留言時的防濫用驗證。管理員從 Cloudflare 的已登入後台審核留言，第一版沒有公開管理 API。
@@ -44,6 +46,10 @@ flowchart TB
 5. 使用現有的 `github.io` 與平台提供的 `workers.dev` 網址。Custom domain 留空，不購買網域，也不需要把 GitHub Pages DNS 搬到 Cloudflare。
 
 若某一步要求新增信用卡、選擇付費方案或開始會轉付費的試用，就停在該步，保留文章服務與關閉中的互動功能；不要為了讓部署繼續而按升級。官方 D1 產品頁目前寫明免費開始不需要信用卡，Workers 預設提供 Free 方案。[D1 產品與免費註冊](https://www.cloudflare.com/products/d1/)；[Workers pricing](https://developers.cloudflare.com/workers/platform/pricing/)。
+
+![本機 Chrome 的 Cloudflare 登入畫面，帳號與密碼欄位皆為空白](ui-review/community/01-cloudflare-sign-in.jpg)
+
+2026-11-09 實拍：目前停在管理者登入步驟，尚未建立後端資源。這張圖只保留空白登入頁，不含帳密、驗證碼或其他帳戶內容。這是網站管理者的設定流程，讀者不需要註冊 Cloudflare 或 GitHub。
 
 ## 4. 設定對照表：哪些可以公開
 

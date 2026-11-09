@@ -73,9 +73,10 @@
 後續需求已確定為「讀者沒有 GitHub 帳號也能參與」與「零支出」。新增 Cloudflare Workers Free＋D1 Free＋Turnstile Free 的後端，以及同正文左界的匿名按讚／留言、每頁／全站統計元件。詳細設定與可重現步驟見 [ENGAGEMENT_SETUP.md](ENGAGEMENT_SETUP.md)。
 
 - 前端與後端開關仍關閉；Cloudflare 本機 Chrome 顯示登入頁。此階段沒有建立正式 D1、Worker 或 Turnstile 資源，也沒有新增付款方式或啟用付費服務。
+- [匿名互動來源匯入 run 42590030877](https://github.com/bradcocox/brad-log/actions/runs/42590030877) 已成功，包含 27 個來源與文件差異檔案。這是原始碼保存紀錄，不是動態服務上線紀錄。
 - 已通過 18 項 Node 24＋SQLite 的實際 SQL/API 測試，涵蓋資料去重、並發重試、匿名在線去重、按讚取消、審核可見範圍、Turnstile 驗證條件、CORS、大小限制、限流、清理及頁面允許清單。
 - `pnpm build` 納入這組後端測試，再執行 Astro 檢查、靜態輸出與公開內容掃描；本機 Astro 檢查 80 檔案無 errors／warnings／hints，輸出 20 個靜態頁面與 19 頁／1 篇文章的公開互動允許清單。
 - 新增 `/privacy/`，明確顯示互動尚未啟用及預定資料處理方式。未設定服務時，文章上不顯示無法使用的按鈕，也不傳送統計與 Turnstile 請求。
 - 本機測試不能替代正式 Cloudflare D1／Turnstile、實際 CPU／配額、桌機與手機互動驗證。這些項目需在使用者登入免費帳戶、完成設定後再確認；本段不宣稱互動功能已正式上線。
 
-本輪來源保存與 Pages 發布結果將以此節後續補記及 GitHub Actions 正式紀錄為準；動態服務啟用須另外明確記錄，不以靜態網站部署成功代替。
+已保存不含帳密的 [Cloudflare 登入頁實拍](ui-review/community/01-cloudflare-sign-in.jpg)，並在設定手冊說明目前待完成的步驟。後續 Pages 發布結果以 [Publish Brad.log](https://github.com/bradcocox/brad-log/actions/workflows/deploy.yml) 的正式紀錄為準；動態服務啟用須另外明確記錄，不以靜態網站部署成功代替。
