@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "test": "node --test test/worker.test.mjs",
-    "bundle": "node scripts/bundle.mjs"
+    "bundle": "node scripts/bundle.mjs",
+    "migration:console": "node scripts/console-migration.mjs"
   },
   "engines": { "node": ">=24" }
 }

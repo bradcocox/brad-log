@@ -117,7 +117,7 @@ function createManifestLookup(manifestFetch, now) {
             const bytes = new Uint8Array(size);
             let offset = 0;
             for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.byteLength; }
-            const data = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes));
+            const data = JSON.parse(new TextDecoder("utf-8", { fatal: true, ignoreBOM: false }).decode(bytes));
             if (!Array.isArray(data.pages) || !Array.isArray(data.articles) ||
                 data.pages.length > 1_000 || data.articles.length > 1_000 ||
                 !data.pages.every(safePagePath) || !data.articles.every(safePagePath)) {
@@ -191,7 +191,7 @@ async function readJson(request) {
   }
   let data;
   try {
-    data = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes));
+    data = JSON.parse(new TextDecoder("utf-8", { fatal: true, ignoreBOM: false }).decode(bytes));
   } catch {
     throw invalid("資料格式不正確，請重新送出。");
   }

@@ -1,8 +1,8 @@
 /** Public connection settings only. Never put a secret or admin token here. */
 export const engagementConfig = {
-  enabled: false,
-  apiBase: "",
-  turnstileSiteKey: "",
+  enabled: true,
+  apiBase: "https://brad-log-community.bradcocox.workers.dev",
+  turnstileSiteKey: "0x4AAAAAAF5s44CmPYe6KGwg",
 };
 
 /** Keep the public site inert until every required service has been configured. */
