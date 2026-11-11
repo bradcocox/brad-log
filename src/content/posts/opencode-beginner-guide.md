@@ -22,7 +22,7 @@ description: 了解 OpenCode 與模型服務的分工，依官方 V2 文件安�
 
 本文會從零開始做一個很小的 Python 練習，並示範如何選擇 **OpenRouter 的免費模型**。**不需要訂閱付費方案，也不會要求儲值。**不過，免費模型仍可能有額度和功能限制，實際使用前一定要再核對。
 
-> **本文驗證狀態：學習整理。** 截至 2026-11-11，安裝指令、設定欄位與功能說明已對照官方文件；本文的三張圖是作者製作的**架構／操作示意圖，不是實際執行畫面截圖**。目前尚未在具備模型金鑰的環境完成端對端實測，因此不會把範例對話或測試結果寫成「已成功執行」。操作介面和模型清單會隨版本更新。
+> **本文驗證狀態：學習整理。** 截至 2026-11-11，安裝指令、設定欄位與功能說明已對照官方文件；本文的流程圖是作者製作的示意圖，另附上 **OpenCode 官方專案提供的真實產品介面截圖**。官方範例畫面不代表本文已完成實測，且範例中使用的模型可能是付費模型。本文尚未以免費模型完成端對端測試，不會把預期結果偽裝為實測紀錄。
 
 ## 這篇會學到什麼？
 
@@ -79,6 +79,14 @@ python3 --version
 
 ## 3. 安裝 OpenCode，先確認使用的是哪個版本
 
+### 先認識真正的操作畫面
+
+![OpenCode 官方終端機介面：左側對話、程式修改紀錄與測試輸出](../../assets/screenshots/opencode-terminal-official.webp)
+
+*官方產品截圖 A：終端機介面的任務紀錄、程式碼修改和測試輸出。來源：[OpenCode 官方 GitHub 專案](https://github.com/anomalyco/opencode/blob/dev/services/site/public/brand/screenshots/opencode-terminal-dark.webp)。**這是官方展示素材，不是本篇實測；畫面中可能有付費模型名稱，請勿照選。***
+
+看到畫面後先辨認三個區域：**對話紀錄**顯示 Agent 準備做什麼；**工具／檔案變動**說明它碰了哪些內容；**執行輸出**才能提供測試是否真的執行的證據。不同終端機大小和版本會改變排版，不必追求與截圖完全相同。
+
 以下以 OpenCode **V2 官方文件**為準。這點特別重要，因為網路搜尋仍會找到 V1 的設定範例，兩版的權限欄位名稱不同。
 
 使用 npm 安裝：
@@ -125,6 +133,15 @@ opencode
 依照 [官方 CLI 文件](https://opencode.ai/docs/cli)，在專案目錄執行 `opencode` 會開啟終端機介面；若之後想用非互動方式操作，也有 `opencode run "..."`。不過初學時，我比較建議用互動介面，逐步確認它要執行的操作。
 
 **成功檢查：** 終端機已進入 OpenCode 的互動介面，而且目前工作位置是剛建立的 `opencode-playground`。
+
+#### 畫面操作對照：第一次打開時
+
+| 你要做的動作 | 在畫面找什麼 | 看到不同結果時 |
+| --- | --- | --- |
+| 確認成功啟動 | OpenCode 的互動輸入區與目前專案 | 若回到一般 shell，先查 `opencode --version` |
+| 連接提供者 | 在輸入區鍵入 `/connect` | 指令列表若不同，查目前版本的官方 Providers 文件 |
+| 切換模型 | 鍵入 `/models`，核對**完整模型 ID** | 不要只看名稱；要確認是否為 `:free` |
+| 送出第一個任務 | 在輸入區貼上第 6 節的唯讀提示 | 先核對是否出現要求讀檔／跑指令的授權提示 |
 
 ## 5. 連接 OpenRouter：先選免費、支援工具呼叫的模型
 
@@ -182,6 +199,14 @@ OpenRouter 的 [Pricing 頁面](https://openrouter.ai/pricing)列出免費方案
 這段需求刻意限定**檔名、行為、套件與禁止事項**。當 Agent 提出寫檔或執行指令的授權請求時，先看清楚路徑和完整命令，再決定是否同意。
 
 ### 第三步：離開互動介面後，親自檢查
+
+如果習慣圖形化檢查 Diff，也可以認識 OpenCode 的桌面版：
+
+![OpenCode 官方桌面介面：對話、檔案列表及修改差異檢視](../../assets/screenshots/opencode-desktop-official.webp)
+
+*官方產品截圖 B：桌面版的檔案與修改差異檢視。來源：[OpenCode 官方 GitHub 專案](https://github.com/anomalyco/opencode/blob/dev/services/site/public/brand/screenshots/opencode-desktop.webp)。畫面是官方展示專案，並非本篇 Python 練習。版本不同時，欄位與按鈕位置可能變動。*
+
+讀這張圖時先找「**被改動的檔案**」和「**差異內容**」：新增的程式碼不代表正確，必須回到自己的練習專案開檔確認。桌面介面不是完成本篇的必要條件。
 
 回到練習資料夾的終端機，執行：
 
@@ -284,7 +309,7 @@ OpenCode V2 在專案根目錄可以使用 `opencode.jsonc` 設定檔。先以�
 
 但它並不是「裝完就能無限制免費寫程式」：模型成本、免費額度、工具呼叫能力，以及資料能否傳送到遠端，仍要由使用者逐項確認。對初學者而言，先在空目錄完成可檢查的 Python 小練習，比直接交給 Agent 處理大型專案更能學到核心概念。
 
-這是 Brad.log 的 **Coding Agent 工具介紹系列第一篇**。後續預計分別介紹 **Cline、Kilo Code、Claude Code Router、Codex Router** 等工具，最後再整理它們在工作流程、模型支援、免費使用條件、權限與適合情境上的差異；每一篇都會以工具本身為主角。
+這是 Brad.log 的 **Coding Agent 工具介紹系列第一篇**。想認識其他工具，可以接著讀：[Cline 入門](/brad-log/posts/cline-beginner-guide/)、[Kilo Code 入門](/brad-log/posts/kilo-code-beginner-guide/)、[Claude Code Router 入門](/brad-log/posts/claude-code-router-beginner-guide/)、[Codex Router 入門](/brad-log/posts/codex-router-beginner-guide/)，最後再看[工具比較與選擇指南](/brad-log/posts/coding-agent-router-comparison/)。每一篇都以工具本身為主角，不用聳動標題排名。
 
 ### 官方參考資料與查閱時間
 

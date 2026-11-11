@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="680" viewBox="0 0 1200 680" role="img" aria-labelledby="title desc">
+  <title id="title">Coding Agent 與模型 Router 的分工</title>
+  <desc id="desc">第一種流程是使用者透過 OpenCode、Cline 或 Kilo Code 等 Agent，直接連接模型提供者。第二種流程是使用者透過既有 Agent，先連到可選的 Claude Code Router 或 Codex Router，接著連接 Provider 或模型。Router 本身不是 Coding Agent，實際相容性須逐一確認。</desc>
+  <defs>
+    <style>
+      text{font-family:Inter,"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;fill:#173640}
+      .title{font-size:37px;font-weight:760}
+      .sub{font-size:21px;fill:#556d75}
+      .label{font-size:25px;font-weight:750}
+      .small{font-size:20px;fill:#57717a}
+      .box{stroke:#cadcd8;stroke-width:2}
+      .arrow{fill:none;stroke:#387d78;stroke-width:5;marker-end:url(#ar-head)}
+      .tag{font-size:19px;fill:#2d7067;font-weight:680}
+    </style>
+    <marker id="ar-head" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#387d78"/></marker>
+  </defs>
+  <rect width="1200" height="680" rx="26" fill="#faf9f5"/>
+  <text x="51" y="65" class="title">先分清楚：Agent 做事，Router 選路</text>
+  <text x="51" y="106" class="sub">路由器是可選的一層；沒有 Agent，通常無法完成完整的程式修改流程。</text>
+
+  <text x="52" y="164" class="tag">路線 A · 初學者可先從這裡開始</text>
+  <rect x="52" y="185" width="442" height="150" rx="20" fill="#e5f2ec" class="box"/>
+  <text x="78" y="229" class="label">Coding Agent</text>
+  <text x="78" y="272" class="small">OpenCode · Cline · Kilo Code</text>
+  <text x="78" y="307" class="small">讀取專案、提出修改與工具動作</text>
+  <path d="M500 260 H680" class="arrow"/>
+  <rect x="688" y="185" width="460" height="150" rx="20" fill="#e7eef6" class="box"/>
+  <text x="712" y="229" class="label">模型提供者 / 模型</text>
+  <text x="712" y="272" class="small">OpenRouter 或其他 Provider</text>
+  <text x="712" y="307" class="small">回應問題、產生建議或工具呼叫</text>
+
+  <text x="52" y="394" class="tag">路線 B · 已有 Agent，想額外控制模型入口</text>
+  <rect x="52" y="420" width="277" height="158" rx="20" fill="#e5f2ec" class="box"/>
+  <text x="76" y="466" class="label">既有 Agent</text>
+  <text x="76" y="506" class="small">實際執行程式任務</text>
+  <text x="76" y="541" class="small">需要另行安裝</text>
+  <path d="M336 497 H402" class="arrow"/>
+  <rect x="413" y="420" width="359" height="158" rx="20" fill="#fff2d9" stroke="#e4c584" stroke-width="2"/>
+  <text x="435" y="466" class="label">可選的模型 Router</text>
+  <text x="435" y="506" class="small">Claude Code Router</text>
+  <text x="435" y="541" class="small">或 Codex Router</text>
+  <path d="M777 497 H847" class="arrow"/>
+  <rect x="857" y="420" width="291" height="158" rx="20" fill="#e7eef6" class="box"/>
+  <text x="880" y="466" class="label">Provider / 模型</text>
+  <text x="880" y="506" class="small">仍需確認費率</text>
+  <text x="880" y="541" class="small">與資料處理政策</text>
+  <text x="52" y="637" class="sub">注意：這是角色示意，不代表所有 Agent 和 Router 都能不經設定直接互通。</text>
+</svg>
