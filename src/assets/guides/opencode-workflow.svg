@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="715" viewBox="0 0 1200 715" role="img" aria-labelledby="title desc">
+  <title id="title">初學者第一次使用 OpenCode 的安全六步驟</title>
+  <desc id="desc">先建立隔離練習資料夾，再安裝與啟動 OpenCode，連接免費模型，提出唯讀需求，授權必要的編輯或指令，最後自己檢查程式碼差異與測試。確認後才決定是否提交 Git 版本。</desc>
+  <defs>
+    <marker id="ow-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 10 5 0 10Z" fill="#407469"/></marker>
+    <style>
+      text{font-family:Inter,"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;fill:#1a3440}
+      .head{font-size:36px;font-weight:750}.subtitle{font-size:22px;fill:#597078}.step{font-size:22px;font-weight:780;fill:#256d61}.label{font-size:26px;font-weight:750}.body{font-size:20px;fill:#4c6671}.card{fill:#fff;stroke:#d8e4e0;stroke-width:2}.link{stroke:#407469;stroke-width:3;fill:none;marker-end:url(#ow-arrow)}
+    </style>
+  </defs>
+  <rect width="1200" height="715" rx="25" fill="#fbfaf7"/>
+  <text x="43" y="69" class="head">第一次操作：先理解，再授權修改</text>
+  <text x="43" y="109" class="subtitle">六個步驟，目的是完成一次可以檢查、可以復原的小練習。</text>
+  <g>
+    <rect x="43" y="165" width="343" height="180" rx="18" class="card"/>
+    <text x="65" y="202" class="step">01 · 建立環境</text><text x="65" y="251" class="label">獨立練習資料夾</text><text x="65" y="294" class="body">不要直接開公司專案</text>
+    <rect x="428" y="165" width="343" height="180" rx="18" class="card"/>
+    <text x="450" y="202" class="step">02 · 準備工具</text><text x="450" y="251" class="label">安裝並啟動</text><text x="450" y="294" class="body">先查看版本資訊</text>
+    <rect x="813" y="165" width="343" height="180" rx="18" fill="#edf5fa" stroke="#aac4d5" stroke-width="2"/>
+    <text x="835" y="202" class="step">03 · 選擇模型</text><text x="835" y="251" class="label">連線與確認費率</text><text x="835" y="294" class="body">只選免費、可用的模型</text>
+    <path d="M386 256 H423" class="link"/><path d="M771 256 H808" class="link"/>
+    <path d="M980 345 V377 H218 V408" class="link"/>
+    <rect x="43" y="413" width="343" height="180" rx="18" fill="#eaf4eb" stroke="#8bb29a" stroke-width="2"/>
+    <text x="65" y="450" class="step">04 · 唯讀詢問</text><text x="65" y="499" class="label">請先提出計畫</text><text x="65" y="542" class="body">確認 Agent 理解需求</text>
+    <rect x="428" y="413" width="343" height="180" rx="18" class="card"/>
+    <text x="450" y="450" class="step">05 · 小步修改</text><text x="450" y="499" class="label">逐項核准動作</text><text x="450" y="542" class="body">注意檔案與指令的範圍</text>
+    <rect x="813" y="413" width="343" height="180" rx="18" class="card"/>
+    <text x="835" y="450" class="step">06 · 親自驗證</text><text x="835" y="499" class="label">檢查差異與測試</text><text x="835" y="542" class="body">正確後才考慮 commit</text>
+    <path d="M386 504 H423" class="link"/><path d="M771 504 H808" class="link"/>
+  </g>
+  <text x="43" y="646" class="subtitle">重點：產生檔案 ≠ 已經驗證正確；模型回覆「測試通過」也要查看真正的執行結果。</text>
+</svg>

@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="700" viewBox="0 0 1200 700" role="img" aria-labelledby="title desc">
+  <title id="title">OpenCode 與模型提供者、OpenRouter 的關係</title>
+  <desc id="desc">使用者在終端機操作 OpenCode，OpenCode 讀取本機練習專案並提出工具動作。模型請求可先經 OpenRouter 再轉給遠端模型，也可直接連接支援的模型提供者。所有遠端連線都需考慮金鑰與傳送內容的安全。</desc>
+  <defs>
+    <marker id="oa-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 10 5 0 10Z" fill="#2f7065"/></marker>
+    <style>
+      text{font-family:Inter,"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;fill:#162e3b}
+      .head{font-size:36px;font-weight:750}.sub{font-size:21px;fill:#536b70}.label{font-size:28px;font-weight:720}.small{font-size:21px;fill:#54686b}.tag{font-size:18px;font-weight:700;fill:#266f64}.panel{stroke:#d8e3e2;stroke-width:2;fill:#fff}.link{stroke:#2f7065;stroke-width:3;fill:none;marker-end:url(#oa-arrow)}
+    </style>
+  </defs>
+  <rect width="1200" height="700" rx="26" fill="#fbfaf7"/>
+  <text x="44" y="67" class="head">OpenCode 是工作代理，不是模型本身</text>
+  <text x="44" y="107" class="sub">把「操作程式碼的工具」和「負責推論的模型服務」分開看。</text>
+  <rect x="44" y="157" width="235" height="215" rx="20" class="panel"/>
+  <text x="70" y="199" class="tag">你的電腦</text>
+  <text x="70" y="249" class="label">使用者</text>
+  <text x="70" y="286" class="small">終端機輸入需求</text>
+  <text x="70" y="326" class="small">確認危險操作</text>
+  <path d="M279 262 H325" class="link"/>
+  <rect x="330" y="157" width="295" height="215" rx="20" fill="#e8f5ee" stroke="#69a18e" stroke-width="2"/>
+  <text x="357" y="199" class="tag">Coding Agent</text>
+  <text x="357" y="249" class="label">OpenCode</text>
+  <text x="357" y="286" class="small">理解任務、讀取檔案</text>
+  <text x="357" y="326" class="small">提出編輯與指令</text>
+  <path d="M625 226 H689" class="link"/>
+  <rect x="694" y="153" width="220" height="152" rx="18" fill="#e8effc" stroke="#8caed9" stroke-width="2"/>
+  <text x="717" y="196" class="tag">可選的模型閘道</text>
+  <text x="717" y="244" class="label">OpenRouter</text>
+  <text x="717" y="280" class="small">選擇 / 轉送模型</text>
+  <path d="M914 225 H949" class="link"/>
+  <rect x="953" y="153" width="202" height="152" rx="18" class="panel"/>
+  <text x="973" y="197" class="tag">遠端服務</text>
+  <text x="973" y="245" class="label" style="font-size:26px">模型提供者</text>
+  <text x="973" y="280" class="small">執行推論</text>
+  <path d="M625 316 H654 V351 H952" stroke="#8698a3" stroke-width="2.5" fill="none" stroke-dasharray="9 7" marker-end="url(#oa-arrow)"/>
+  <text x="674" y="343" class="small" style="font-size:18px">也能直接連接模型服務</text>
+  <rect x="330" y="417" width="295" height="118" rx="16" fill="#fff" stroke="#d8e3e2" stroke-width="2"/>
+  <text x="357" y="462" class="label" style="font-size:24px">本機練習專案</text>
+  <text x="357" y="500" class="small">原始碼、測試與 Git 差異</text>
+  <path d="M480 373 V412" class="link"/>
+  <rect x="44" y="572" width="1111" height="86" rx="16" fill="#fff2dc" stroke="#e5c990" stroke-width="2"/>
+  <text x="70" y="609" class="label" style="font-size:22px">安全與成本邊界</text>
+  <text x="70" y="642" class="small">檔案片段與提示可能送往遠端模型；工具免費不代表所有模型免費，請先核對模型單價。</text>
+</svg>

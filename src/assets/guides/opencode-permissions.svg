@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="620" viewBox="0 0 1200 620" role="img" aria-labelledby="title desc">
+  <title id="title">OpenCode 三種權限效果與初學者建議</title>
+  <desc id="desc">allow 表示直接允許，ask 表示先詢問，deny 表示阻擋。示例中允許查詢 Git 狀態，編輯檔案和執行一般指令需要詢問，推送程式碼可設成阻擋。規則只是一道防線，仍需確認操作與檔案範圍。</desc>
+  <defs>
+    <style>
+      text{font-family:Inter,"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;fill:#193643}
+      .head{font-size:36px;font-weight:750}.sub{font-size:21px;fill:#577079}.label{font-size:34px;font-weight:760}.body{font-size:23px}.detail{font-size:20px;fill:#567076}.pill{font-size:20px;font-weight:700}
+    </style>
+  </defs>
+  <rect width="1200" height="620" rx="24" fill="#fafbf7"/>
+  <text x="42" y="65" class="head">權限效果：允許、詢問、阻擋</text>
+  <text x="42" y="107" class="sub">每次 Agent 嘗試讀取、修改或執行指令，都要看對應規則。</text>
+  <rect x="42" y="157" width="348" height="280" rx="20" fill="#eaf5ec" stroke="#8cb89b" stroke-width="2"/>
+  <text x="66" y="213" class="label" fill="#205e41">allow</text><text x="66" y="263" class="body">直接執行</text>
+  <rect x="66" y="290" width="282" height="47" rx="12" fill="#fff"/>
+  <text x="83" y="319" class="pill">例：git status 查詢</text><text x="66" y="383" class="detail">只適合低風險、明確</text><text x="66" y="412" class="detail">且信任的行為</text>
+  <rect x="426" y="157" width="348" height="280" rx="20" fill="#fff3da" stroke="#e5bf78" stroke-width="2"/>
+  <text x="450" y="213" class="label">ask</text><text x="450" y="263" class="body">等待你確認</text>
+  <rect x="450" y="290" width="282" height="47" rx="12" fill="#fff"/>
+  <text x="467" y="319" class="pill">例：編輯 / 執行 shell</text><text x="450" y="383" class="detail">先看檔案、指令與影響</text><text x="450" y="412" class="detail">再決定同不同意</text>
+  <rect x="810" y="157" width="348" height="280" rx="20" fill="#fdeee9" stroke="#e0a38d" stroke-width="2"/>
+  <text x="834" y="213" class="label">deny</text><text x="834" y="263" class="body">阻擋動作</text>
+  <rect x="834" y="290" width="282" height="47" rx="12" fill="#fff"/>
+  <text x="851" y="319" class="pill">例：git push *</text><text x="834" y="383" class="detail">把不需要的操作</text><text x="834" y="412" class="detail">設為明確禁止</text>
+  <rect x="42" y="477" width="1116" height="101" rx="18" fill="#edf1f4" stroke="#cfd9dd" stroke-width="2"/>
+  <text x="66" y="518" class="body" style="font-weight:740">重要：</text><text x="147" y="518" class="detail">權限規則不能取代專案隔離、金鑰管理與人工 code review。</text>
+  <text x="66" y="553" class="detail">同一種危險行為也可能用不同指令寫出來；不要把單一 deny 規則當成完整沙箱。</text>
+</svg>
