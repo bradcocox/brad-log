@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="660" viewBox="0 0 1200 660" role="img" aria-labelledby="title desc">
+  <title id="title">Airflow 3.4 Task Loops 的有界迭代流程</title>
+  <desc id="desc">一個資料品質工作流程從取樣開始，進入 Task Loop 執行修復與檢查。若驗收條件成功，退出迴圈並產出報告；若失敗且還沒達到上限，繼續下一輪。若到達 max_iterations 仍失敗，則整體工作流程應標記失敗。</desc>
+  <defs>
+    <marker id="a-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#316f7c"/></marker>
+    <style>text{font-family:Inter,"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;fill:#1a3441}.title{font-size:37px;font-weight:760}.sub{font-size:21px;fill:#5c7380}.head{font-size:26px;font-weight:740}.body{font-size:21px}.line{stroke:#316f7c;stroke-width:3;fill:none;marker-end:url(#a-arrow)}.dash{stroke-dasharray:8 7}</style>
+  </defs>
+  <rect width="1200" height="660" rx="28" fill="#f9fbfd"/>
+  <text x="48" y="67" class="title">Airflow 3.4 Task Loops：重試要有「停止條件」</text>
+  <text x="48" y="105" class="sub">概念範例：資料品質修復 → 再驗證；不是可直接執行的 DAG 程式碼。</text>
+  <rect x="50" y="219" width="195" height="113" rx="16" fill="#e6f2f4" stroke="#85b8bf" stroke-width="2"/>
+  <text x="75" y="267" class="head">取樣資料</text>
+  <text x="75" y="302" class="body">開始檢查</text>
+  <path d="M245 274 H312" class="line"/>
+  <rect x="317" y="153" width="390" height="303" rx="20" fill="#e7f0fc" stroke="#88a9d6" stroke-width="2"/>
+  <text x="341" y="194" class="head">Task Loop（max_iterations）</text>
+  <rect x="356" y="222" width="313" height="70" rx="14" fill="#fff" stroke="#a4bce0"/>
+  <text x="384" y="266" class="head">執行修復 / 更新</text>
+  <path d="M511 292 V328" class="line"/>
+  <rect x="356" y="333" width="313" height="70" rx="14" fill="#fff" stroke="#a4bce0"/>
+  <text x="385" y="378" class="head">驗證資料品質</text>
+  <path d="M669 366 H695 V275 H714" class="line"/>
+  <path d="M820 228 L925 275 L820 322 L715 275 Z" fill="#fff3df" stroke="#dab57a" stroke-width="2"/>
+  <text x="762" y="281" class="body">達標了嗎？</text>
+  <path d="M925 275 H978" class="line"/>
+  <text x="938" y="255" class="body">是</text>
+  <rect x="985" y="222" width="170" height="107" rx="16" fill="#e0f5e8" stroke="#7bb78e" stroke-width="2"/>
+  <text x="1005" y="266" class="head">完成報告</text>
+  <text x="1005" y="301" class="body">成功結束</text>
+  <path d="M821 322 V497 H513 V456" class="line dash"/>
+  <text x="841" y="444" class="body">否，尚未達上限</text>
+  <rect x="580" y="536" width="575" height="78" rx="14" fill="#fff0e6" stroke="#dbb39d" stroke-width="2"/>
+  <text x="606" y="569" class="head" style="font-size:23px">達上限但仍不達標 → 失敗並告警</text>
+  <text x="606" y="594" class="sub" style="font-size:18px">不得無限循環或默默當成成功</text>
+  <text x="48" y="633" class="sub">圖示化解釋 AIP-111 的有界迭代；實際配置與限制依 Airflow 3.4 官方文件。</text>
+</svg>

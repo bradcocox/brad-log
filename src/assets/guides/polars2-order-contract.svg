@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="620" viewBox="0 0 1200 620" role="img" aria-labelledby="title desc">
+  <title id="title">Polars 2.0 的資料列順序契約</title>
+  <desc id="desc">Polars LazyFrame 使用 Streaming Engine 執行 group by 或 join 時，沒有明確指定順序就不保證資料列排序。對下游有順序需求的資料，應明確 sort 或設定支援的 maintain_order，並加入斷言驗證。</desc>
+  <defs>
+    <marker id="p-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#287a70"/></marker>
+    <style>text{font-family:Inter,"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;fill:#19323b}.title{font-size:38px;font-weight:750}.sub{font-size:21px;fill:#547079}.cardtitle{font-size:26px;font-weight:750}.body{font-size:22px}.small{font-size:19px}.edge{stroke:#287a70;stroke-width:3;fill:none;marker-end:url(#p-arrow)}</style>
+  </defs>
+  <rect width="1200" height="620" rx="28" fill="#fafbf8"/>
+  <text x="48" y="68" class="title">Polars 2.0：計算正確，不代表列順序有保證</text>
+  <text x="48" y="105" class="sub">LazyFrame 預設走 Streaming Engine；如果下游需要順序，請把順序寫成資料契約。</text>
+  <rect x="48" y="165" width="270" height="150" rx="18" fill="#e5f3ed" stroke="#83b5a1" stroke-width="2"/>
+  <text x="73" y="213" class="cardtitle">原始資料</text>
+  <text x="73" y="255" class="body">訂單 customer、amount</text>
+  <text x="73" y="284" class="small">輸入順序可見</text>
+  <path d="M318 239 H390" class="edge"/>
+  <rect x="396" y="165" width="350" height="150" rx="18" fill="#e8eef9" stroke="#87a6d1" stroke-width="2"/>
+  <text x="423" y="213" class="cardtitle">LazyFrame 計算</text>
+  <text x="423" y="255" class="body">group_by / join / unpivot</text>
+  <text x="423" y="284" class="small">沒有宣告順序，就不能依賴它</text>
+  <path d="M746 206 H818" class="edge"/>
+  <rect x="824" y="139" width="330" height="158" rx="18" fill="#fff1df" stroke="#deb676" stroke-width="2"/>
+  <text x="850" y="188" class="cardtitle">風險：直接交給下游</text>
+  <text x="850" y="226" class="body">報表／CSV 依「第 N 列」比對</text>
+  <text x="850" y="263" class="small">同樣的值，列順序可能不同</text>
+  <path d="M578 315 V370" class="edge"/>
+  <rect x="396" y="375" width="350" height="144" rx="18" fill="#e1f5e8" stroke="#71af87" stroke-width="2"/>
+  <text x="423" y="420" class="cardtitle">修正：顯式宣告順序</text>
+  <text x="423" y="459" class="body">sort / maintain_order</text>
+  <text x="423" y="491" class="small">再用 assert 比對值與順序</text>
+  <path d="M746 447 H818" class="edge"/>
+  <rect x="824" y="375" width="330" height="144" rx="18" fill="#fff" stroke="#83b5a1" stroke-width="2"/>
+  <text x="851" y="420" class="cardtitle">結果：可測的資料契約</text>
+  <text x="851" y="459" class="body">固定排序、固定主鍵</text>
+  <text x="851" y="491" class="small">不依賴執行器的偶然行為</text>
+  <text x="48" y="583" class="sub">本圖為架構示意，非產品截圖；不代表所有 Polars 運算都會重新排序。</text>
+</svg>

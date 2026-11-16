@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="650" viewBox="0 0 1200 650" role="img" aria-labelledby="title desc">
+  <title id="title">DuckDB 2.0 的三種使用情境</title>
+  <desc id="desc">DuckDB 2.0 可在 Python 程式內執行嵌入式分析，也能透過 Quack 協定進行受控的伺服器連線，還能在命令列提供給 Coding Agent 較精簡的輸出。Parquet、CSV 與 DuckDB 檔案可受益於非同步輸入輸出；正式環境部署需要評估資源、認證與安全。</desc>
+  <defs>
+    <marker id="d-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#397a73"/></marker>
+    <style>text{font-family:Inter,"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;fill:#18313a}.title{font-size:38px;font-weight:740}.sub{font-size:21px;fill:#567079}.cardtitle{font-size:25px;font-weight:730}.body{font-size:21px}.arrow{stroke:#397a73;stroke-width:3;fill:none;marker-end:url(#d-arrow)}</style>
+  </defs>
+  <rect width="1200" height="650" rx="28" fill="#fdfbf6"/>
+  <text x="48" y="67" class="title">DuckDB 2.0：不只一種使用方式</text>
+  <text x="48" y="104" class="sub">同一個查詢引擎，用途不同，安全與架構責任也不同。</text>
+  <rect x="45" y="164" width="350" height="275" rx="20" fill="#e8f5ee" stroke="#75ae96" stroke-width="2"/>
+  <text x="68" y="210" class="cardtitle">1. Embedded</text>
+  <text x="68" y="255" class="body">Python 應用</text>
+  <path d="M183 268 V310" class="arrow"/>
+  <rect x="88" y="317" width="265" height="66" rx="12" fill="#fff" stroke="#a9cbbb"/>
+  <text x="111" y="357" class="cardtitle" style="font-size:23px">DuckDB 記憶體 / 檔案</text>
+  <text x="68" y="414" class="body">適合本機 ETL、探索、測試</text>
+  <rect x="426" y="164" width="350" height="275" rx="20" fill="#ebf0fa" stroke="#8eadd9" stroke-width="2"/>
+  <text x="449" y="210" class="cardtitle">2. Quack Server</text>
+  <text x="449" y="255" class="body">CLI / Client</text>
+  <path d="M564 268 V310" class="arrow"/>
+  <rect x="466" y="317" width="266" height="66" rx="12" fill="#fff" stroke="#afbfdf"/>
+  <text x="494" y="357" class="cardtitle" style="font-size:23px">受控遠端查詢</text>
+  <text x="449" y="414" class="body">正式環境需 TLS / 權限設計</text>
+  <rect x="807" y="164" width="348" height="275" rx="20" fill="#fff2df" stroke="#ddbd85" stroke-width="2"/>
+  <text x="830" y="210" class="cardtitle">3. Agent Mode</text>
+  <text x="830" y="255" class="body">Coding Agent 呼叫 CLI</text>
+  <path d="M942 268 V310" class="arrow"/>
+  <rect x="846" y="317" width="266" height="66" rx="12" fill="#fff" stroke="#e2c99f"/>
+  <text x="859" y="357" class="cardtitle" style="font-size:22px">精簡輸出 / JSON 錯誤</text>
+  <text x="830" y="414" class="body">改善可讀性，不取代授權</text>
+  <rect x="45" y="484" width="1110" height="109" rx="18" fill="#fff" stroke="#e0e3e0" stroke-width="2"/>
+  <text x="71" y="527" class="cardtitle">資料層：CSV / Parquet / DuckDB 檔案 / 半結構化 VARIANT</text>
+  <text x="71" y="560" class="sub">非同步 I/O 是引擎的改進，不代表所有查詢都會等比例加速。資料庫檔案升級前先確認相容性。</text>
+  <text x="48" y="623" class="sub">本圖為自製架構示意，非官方產品介面截圖。</text>
+</svg>
