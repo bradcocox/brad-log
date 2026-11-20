@@ -7,6 +7,7 @@ import IconMoon from "@/assets/icons/IconMoon.svg";
 import IconX from "@/assets/icons/IconX.svg";
 import { stripBase, stripLocale } from "@/utils/withBase";
 import config from "@/config";
+import BrandLogo from "@/components/BrandLogo.astro";
 const locale = Astro.currentLocale ?? config.site.lang;
 const currentPath = stripLocale(stripBase(Astro.url.pathname), locale);
 const nav = [
@@ -21,15 +22,21 @@ const isActive = (path: string) =>
 <a id="skip-to-content" href="#main-content" class="skip-link">跳至主要內容</a>
 <header class="site-header" data-pagefind-ignore>
   <div class="wide-layout header-inner">
-    <a
-      class="site-brand"
-      href={getRelativeLocaleUrl(locale, "")}
-      aria-label="Brad.log 首頁"
-    >
-      <span class="brand-mark" aria-hidden="true">b.</span><span
-        >Brad<span class="brand-dot">.</span>log</span
+    <div class="site-brand-wrap" data-brand-logo>
+      <a
+        class="site-brand"
+        href={getRelativeLocaleUrl(locale, "")}
+        aria-label="Brad.log 首頁"
       >
-    </a>
+        <BrandLogo />
+      </a>
+      <button
+        class="brand-logo-play"
+        type="button"
+        aria-label="播放 Brad.log 紙張收納動畫"
+        title="播放 Logo 動畫"
+      ></button>
+    </div>
     <nav
       id="menu-items"
       class="site-nav"
@@ -129,6 +136,32 @@ const isActive = (path: string) =>
         main?.focus();
       });
   }
+  function setupBrandLogo() {
+    const container = document.querySelector<HTMLElement>("[data-brand-logo]");
+    const logo = container?.querySelector<HTMLElement>(".brand-logo");
+    const playButton = container?.querySelector<HTMLButtonElement>(".brand-logo-play");
+    const word = logo?.querySelector<SVGGElement>(".brand-word-log");
+    if (!container || !logo || !playButton || !word || container.dataset.ready) return;
+    container.dataset.ready = "true";
+
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const play = () => {
+      if (reducedMotion.matches || logo.classList.contains("is-playing")) return;
+      logo.classList.add("is-playing");
+    };
+    const finish = (event: AnimationEvent) => {
+      if (event.target === word) logo.classList.remove("is-playing");
+    };
+
+    container.addEventListener("pointerenter", play);
+    playButton.addEventListener("click", play);
+    playButton.addEventListener("focus", play);
+    logo.addEventListener("animationend", finish);
+  }
   setupHeader();
-  document.addEventListener("astro:page-load", setupHeader);
+  setupBrandLogo();
+  document.addEventListener("astro:page-load", () => {
+    setupHeader();
+    setupBrandLogo();
+  });
 </script>

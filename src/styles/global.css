@@ -965,6 +965,149 @@
     display: none;
   }
 }
+
+/* The header stays compact until hovered or the b. button is activated. */
+.site-brand-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+}
+.brand-logo {
+  display: inline-block;
+  line-height: 0;
+  vertical-align: middle;
+}
+.brand-logo svg {
+  display: block;
+  width: 210px;
+  height: auto;
+  overflow: visible;
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-weight: 750;
+  letter-spacing: -0.045em;
+}
+.brand-logo-mark { fill: var(--accent); }
+.brand-logo-mark-text {
+  fill: var(--accent-foreground);
+  font-size: 29px;
+  letter-spacing: -0.085em;
+}
+.brand-logo-text {
+  fill: var(--foreground);
+  font-size: 28px;
+}
+.brand-letter-dot { fill: var(--accent); }
+.brand-logo-play {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 5px;
+  transform: translateY(-50%);
+  width: 41px;
+  height: 41px;
+  padding: 0;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  cursor: pointer;
+}
+.brand-logo-play:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.brand-word-insert,
+.brand-sheet { opacity: 0; }
+.brand-sheet {
+  transform-box: fill-box;
+  transform-origin: center;
+  filter: drop-shadow(0 1px 1px #00000018);
+}
+.brand-sheet rect {
+  fill: var(--surface);
+  stroke: var(--border);
+  stroke-width: 0.8;
+}
+.brand-sheet path {
+  fill: none;
+  stroke: var(--border);
+  stroke-width: 0.8;
+}
+.brand-sheet text {
+  fill: var(--foreground);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-anchor: middle;
+}
+.brand-sheet text.brand-letter-dot { fill: var(--accent); }
+.brand-logo:is(.is-playing, .brand-logo-showcase) .brand-word-log {
+  animation: brand-log-shift 2.35s ease-in-out both;
+}
+.brand-logo:is(.is-playing, .brand-logo-showcase) .brand-word-insert {
+  animation: brand-letters 2.35s linear both;
+}
+.brand-logo:is(.is-playing, .brand-logo-showcase) .brand-sheet {
+  animation: brand-fold-paper 2.35s ease-in-out both;
+}
+.brand-logo-showcase .brand-word-log,
+.brand-logo-showcase .brand-word-insert,
+.brand-logo-showcase .brand-sheet {
+  animation-iteration-count: infinite !important;
+  animation-delay: 0.4s !important;
+}
+@keyframes brand-log-shift {
+  0%, 12%, 92%, 100% { transform: translateX(0); }
+  28%, 70% { transform: translateX(64px); }
+}
+@keyframes brand-letters {
+  0%, 38%, 76%, 100% { opacity: 0; }
+  48%, 65% { opacity: 1; }
+}
+@keyframes brand-fold-paper {
+  0%, 13%, 90%, 100% {
+    opacity: 0;
+    transform: translateX(var(--travel)) rotate(var(--tilt)) scale(0.24);
+  }
+  29%, 43% {
+    opacity: 1;
+    transform: translateX(0) rotate(-4deg) scale(1);
+  }
+  52%, 63% {
+    opacity: 0;
+    transform: translateX(0) rotate(0) scale(1);
+  }
+  73% {
+    opacity: 1;
+    transform: translateX(0) rotate(-4deg) scale(1);
+  }
+}
+/* A slow loop belongs only on the About page, not in navigation. */
+.brand-story {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding: 24px;
+  margin-block: 24px 34px;
+  background: var(--surface-subtle);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.brand-story-art { flex: 0 0 48%; min-width: 0; }
+.brand-story-art .brand-logo svg { width: 100%; }
+.brand-story-copy { min-width: 0; flex: 1; }
+.brand-story-copy p { margin: 0; }
+.brand-story-copy .eyebrow { margin-bottom: 8px; }
+@media (max-width: 767px) {
+  .brand-logo svg { width: 174px; }
+  .brand-logo-play { width: 34px; height: 34px; }
+  .brand-story { flex-direction: column; align-items: stretch; }
+  .brand-story-art .brand-logo svg { width: min(100%, 320px); }
+}
+@media (max-width: 380px) {
+  .brand-logo svg { width: 153px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

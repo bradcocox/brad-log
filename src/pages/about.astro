@@ -6,6 +6,7 @@ import Breadcrumb from "@/components/Breadcrumb.astro";
 import Main from "@/components/Main.astro";
 import Footer from "@/components/Footer.astro";
 import config from "@/config";
+import BrandLogo from "@/components/BrandLogo.astro";
 
 const about = await getEntry("pages", "about");
 
@@ -29,6 +30,15 @@ const { Content } = await render(about);
   <Breadcrumb />
 
   <Main pageTitle={about.data.title} class="app-prose">
+    <aside class="brand-story" aria-label="Brad.log 品牌動畫">
+      <div class="brand-story-art">
+        <BrandLogo showcase />
+      </div>
+      <div class="brand-story-copy">
+        <p class="eyebrow">FROM BRAD.LOG TO BLOG</p>
+        <p>把零散的筆記像紙張一樣收好，留下清楚好找的 Blog。這就是 Brad.log 的小小品牌動畫。</p>
+      </div>
+    </aside>
     <Content />
   </Main>
 

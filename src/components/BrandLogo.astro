@@ -1,0 +1,42 @@
+---
+interface Props {
+  showcase?: boolean;
+}
+
+const { showcase = false } = Astro.props;
+---
+
+<!-- B and "log" remain visible; only the four paper letters "rad." fold away. -->
+<span class:list={["brand-logo", { "brand-logo-showcase": showcase }]} aria-hidden="true">
+  <svg viewBox="0 0 220 62" xmlns="http://www.w3.org/2000/svg" focusable="false">
+    <rect class="brand-logo-mark" x="5" y="10" width="42" height="42" rx="10" />
+    <text class="brand-logo-mark-text" x="13" y="42">b.</text>
+    <text class="brand-logo-text" x="58" y="42">B</text>
+    <g class="brand-word-log">
+      <text class="brand-logo-text" x="81" y="42">log</text>
+    </g>
+    <text class="brand-logo-text brand-word-insert" x="81" y="42">rad<tspan class="brand-letter-dot">.</tspan></text>
+    <g class="brand-pages">
+      <g class="brand-sheet" style="--travel: -51px; --tilt: -19deg">
+        <rect x="80" y="17" width="16" height="31" rx="3" />
+        <path d="M91 17v5h5" />
+        <text x="88" y="40">r</text>
+      </g>
+      <g class="brand-sheet" style="--travel: -68px; --tilt: 13deg">
+        <rect x="96" y="17" width="16" height="31" rx="3" />
+        <path d="M107 17v5h5" />
+        <text x="104" y="40">a</text>
+      </g>
+      <g class="brand-sheet" style="--travel: -85px; --tilt: -14deg">
+        <rect x="112" y="17" width="16" height="31" rx="3" />
+        <path d="M123 17v5h5" />
+        <text x="120" y="40">d</text>
+      </g>
+      <g class="brand-sheet" style="--travel: -101px; --tilt: 16deg">
+        <rect x="128" y="17" width="16" height="31" rx="3" />
+        <path d="M139 17v5h5" />
+        <text class="brand-letter-dot" x="136" y="40">.</text>
+      </g>
+    </g>
+  </svg>
+</span>
