@@ -42,7 +42,7 @@ description: "以多 Agent 管理、手機控制、Git 工作流、權限、成�
 
 [Conductor](https://www.conductor.build/) 常被拿來討論桌面端同時管理多個 Coding Agent 工作的使用體驗，特別是多 Workspace、Branch／Worktree 及審閱工作流。它更值得從**平行開發的操作效率**切入，而不是拿手機遠端控制當主要比較點。
 
-[Happy](https://github.com/slopus/happy) 的定位則偏向**從手機遠端操控現有 Coding Agent**。如果你的核心痛點是「離開電腦之後 Agent 停在等待批准」，這條產品線更直接對應需求。
+[Happy](https://github.com/slopus/happy) 同時提供手機、Web 與桌面端的多 Agent 使用方式。原始 CLI 以**從手機遠端操控現有 Coding Agent**著稱；目前的 Happy Desktop／Happy Harness 也支援多模型、協作與端對端加密的手機連線。因此不應把它簡化為只有手機遠端控制的工具。
 
 這裡比較的是各產品的**產品定位和已公開功能**，不推論它們一定完整支援彼此的全部 Provider 或每個平台。
 
@@ -50,11 +50,11 @@ description: "以多 Agent 管理、手機控制、Git 工作流、權限、成�
 
 | 需求 | T3 Code | Conductor | Happy |
 | --- | --- | --- | --- |
-| 主要定位 | 多 Provider 控制平台 | 桌面多 Agent 工作管理 | 手機遠端控制 Coding Agent |
-| 多 Provider 整合 | 官方列出 Claude、Codex、OpenCode 等 | 依現行版本／方案確認 | 依專案支援的 Agent 確認 |
-| 手機接手任務 | 官方 iOS、Android App | 非本文確認的核心能力 | 產品重點 |
-| Git Worktree / Diff | 官方文件完整描述 | 工作區並行是主要方向 | 應依專案文件核對 |
-| 部署與控制 | 本機 Server；LAN、Tailscale、T3 Connect | 以官方現行桌面安裝說明為準 | 依官方手機／主機連線方式 |
+| 主要定位 | 多 Provider 控制平台 | 桌面多 Agent 工作管理 | 跨裝置多 Agent 平台，原始 CLI 著重手機遠端 |
+| 多 Provider 整合 | 官方列出 Claude、Codex、OpenCode 等 | 官方列出 Claude、Codex、Cursor、OpenCode | 官方列出 Claude、Codex、Grok、Gemini 等，OpenCode 可經 ACP 整合 |
+| 手機接手任務 | 官方 iOS、Android App | 非官方文件主要介紹的核心能力 | 官方 iOS、Android App，支援加密同步 |
+| Git Worktree / Diff | 官方文件完整描述 | 官方明確採 Worktree 隔離各 Workspace | 需另依桌面版本與工作模式核對 |
+| 部署與控制 | 本機 Server；LAN、Tailscale、T3 Connect | macOS 桌面工作區 | 官方跨裝置架構包含 CLI、桌面 App、手機與 Relay |
 | 費用 | App 開源 MIT；Provider 使用成本另計 | 官方當下定價與授權須另查 | 查看官方授權、服務與 Provider 費用 |
 
 表中「依文件確認」不是負面評價，而是避免把不同版本、不同方案或未驗證功能硬說成一致。尤其**模型費用**與**管理工具價格**不是一回事。
@@ -107,4 +107,4 @@ description: "以多 Agent 管理、手機控制、Git 工作流、權限、成�
 
 **上一篇：** [T3 Code 架構解析](../t3-code-architecture/)　｜　**返回系列開頭：** [T3 Code 是什麼？](../t3-code-overview/)
 
-**來源：** [T3 Code](https://github.com/pingdotgg/t3code) · [Conductor 官方網站](https://www.conductor.build/) · [Happy GitHub](https://github.com/slopus/happy) · [T3 Code Issue #41195](https://github.com/pingdotgg/t3code/issues/41195) · [官方權限文件](https://github.com/pingdotgg/t3code/blob/main/docs/user/permission-modes.md)
+**來源：** [T3 Code](https://github.com/pingdotgg/t3code) · [Conductor 官方網站](https://www.conductor.build/) · [Happy GitHub](https://github.com/slopus/happy) · [Happy Desktop](https://github.com/slopus/happy-desktop) · [Conductor Git Worktree 文件](https://www.conductor.build/docs/concepts/git-worktrees) · [T3 Code Issue #41195](https://github.com/pingdotgg/t3code/issues/41195) · [官方權限文件](https://github.com/pingdotgg/t3code/blob/main/docs/user/permission-modes.md)
