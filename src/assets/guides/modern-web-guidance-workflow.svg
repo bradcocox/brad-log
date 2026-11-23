@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1160 480" role="img" aria-labelledby="ttl desc">
+<title id="ttl">Modern Web Guidance：搜尋、取用、實作、驗證</title><desc id="desc">一個前端任務先由 coding agent 搜尋現代 web 指南，取回相關規則，實作並於瀏覽器驗證，最後回報結果。</desc>
+<defs><style>text{font-family:ui-sans-serif,system-ui,-apple-system,"Noto Sans TC",sans-serif;fill:#193047}.small{font-size:21px;fill:#4a6377}.large{font-size:29px;font-weight:700}.num{font-size:20px;fill:#146a79;font-weight:bold}.box{fill:#fff;stroke:#bdd6db;stroke-width:2}.arrow{stroke:#3b8990;stroke-width:4;fill:none;stroke-linecap:round}</style><marker id="end" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 Z" fill="#3b8990"/></marker></defs>
+<rect x="4" y="4" width="1152" height="472" rx="24" fill="#f2f8f9" stroke="#d3e5e7"/>
+<text x="44" y="54" class="large">Coding Agent × Modern Web Guidance</text>
+<text x="45" y="92" class="small">指南給出建議；瀏覽器與測試才負責驗證結果。</text>
+<rect class="box" x="38" y="143" rx="19" width="236" height="180"/><text class="num" x="58" y="175">01 / TASK</text><text x="58" y="218" class="large">前端需求</text><text x="58" y="255" class="small">Modal、表單</text><text x="58" y="288" class="small">效能或版面</text>
+<path class="arrow" d="M282 230 H316" marker-end="url(#end)"/>
+<rect class="box" x="324" y="143" rx="19" width="236" height="180"/><text class="num" x="344" y="175">02 / SEARCH</text><text x="344" y="218" class="large">本機檢索</text><text x="344" y="255" class="small">Hybrid 搜尋</text><text x="344" y="288" class="small">Dense + BM25</text>
+<path class="arrow" d="M568 230 H602" marker-end="url(#end)"/>
+<rect class="box" x="610" y="143" rx="19" width="236" height="180"/><text class="num" x="630" y="175">03 / RETRIEVE</text><text x="630" y="218" class="large">選取指南</text><text x="630" y="255" class="small">Baseline、陷阱</text><text x="630" y="288" class="small">Fallback 規則</text>
+<path class="arrow" d="M854 230 H888" marker-end="url(#end)"/>
+<rect class="box" x="896" y="143" rx="19" width="226" height="180"/><text class="num" x="916" y="175">04 / VERIFY</text><text x="916" y="218" class="large">實作驗證</text><text x="916" y="255" class="small">Test、DevTools</text><text x="916" y="288" class="small">人工 Review</text>
+<text x="50" y="390" class="small">執行指南來源：GoogleChrome / modern-web-guidance-src；此圖為研究者依公開架構繪製的示意，不是工具截圖。</text>
+</svg>
