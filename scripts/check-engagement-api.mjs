@@ -1,5 +1,6 @@
 // Read-only production contract: freshly published HTML -> trusted manifest -> Worker.
 import { readFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
 import { setTimeout as sleep } from "node:timers/promises";
 
 const ORIGIN = "https://bradcocox.github.io";
@@ -25,11 +26,13 @@ async function verify() {
   if (!published.response.ok || !Array.isArray(published.body?.articles)) {
     throw new Error(`Public manifest unavailable (HTTP ${published.response.status})`);
   }
-  const actualArticles = new Set(published.body.articles);
-  for (const article of expectedArticles) {
-    if (!actualArticles.has(article)) {
-      throw new Error(`Pages deployment is stale: missing ${article}`);
-    }
+  // Both datasets must be exactly equal: not only "all expected posts exist".
+  const canonical = value => JSON.stringify({
+    pages: [...value.pages].sort(),
+    articles: [...value.articles].sort(),
+  });
+  if (!Array.isArray(published.body.pages) || canonical(expected) !== canonical(published.body)) {
+    throw new Error("Published Pages manifest does not EXACTLY match this build.");
   }
   // Health probes must distinguish "Worker is misconfigured" from
   // "the dynamic manifest source is temporarily unavailable".
@@ -38,12 +41,17 @@ async function verify() {
     throw new Error(`Worker /health is not configured: HTTP ${health.response.status}, code=${health.body?.error?.code ?? "unknown"}`);
   }
   const manifestStatus = await readJson(`${API}/health/manifest`);
-  if (manifestStatus.response.status !== 200 && manifestStatus.response.status !== 503) {
-    throw new Error(`Unexpected Worker manifest health status: HTTP ${manifestStatus.response.status}`);
-  }
-  if (manifestStatus.body?.remoteAvailable !== true) {
-    process.stderr.write(
-      "Warning: Worker remote manifest fetch is degraded. Verifying each article against the bundled fallback from this very build.\n"
+  const digest = createHash("sha256").update(canonical(expected)).digest("hex");
+  if (!manifestStatus.response.ok ||
+      manifestStatus.body?.status !== "ok" ||
+      manifestStatus.body?.source !== "deploy-bundle" ||
+      manifestStatus.body?.sha256 !== digest ||
+      manifestStatus.body?.articles !== expected.articles.length ||
+      manifestStatus.body?.pages !== expected.pages.length) {
+    throw new Error(
+      `Worker manifest does not match the published Pages build: HTTP ${manifestStatus.response.status}, ` +
+      `source=${manifestStatus.body?.source ?? "none"}, ` +
+      `hashMatch=${manifestStatus.body?.sha256 === digest}. Deployment cannot pass while unsynced.`
     );
   }
 
@@ -65,7 +73,7 @@ async function verify() {
     }
   }
   process.stdout.write(
-    `Verified public manifest, Worker /health, comments and likes for ${expectedArticles.size} published articles. Remote manifest fetch: ${manifestStatus.body?.remoteAvailable ? "ok" : "degraded (bundled fallback verified)"}.\n`
+    `Verified public manifest, Worker /health, comments and likes for ${expectedArticles.size} published articles. Worker bundle SHA256 is an exact match.\n`
   );
 }
 

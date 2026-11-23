@@ -145,17 +145,19 @@ Turnstile token 有效期為 5 分鐘，而且只能驗證一次；超時或重�
 
 ### 7.1 準備正式頁面清單與後端檔案
 
-先在 repo 根目錄執行 `pnpm build`。建置使用 `scripts/generate-engagement-manifest.mjs`，從 Astro 實際輸出的頁面產生 `dist/engagement-pages.json`。部署後固定網址為 `https://bradcocox.github.io/brad-log/engagement-pages.json`，Worker 只從這個固定的第一方位置取得新增頁面清單，最多快取 5 分鐘。
+先在 repo 根目錄執行 `pnpm build`。建置使用 `scripts/generate-engagement-manifest.mjs`，從 Astro 實際輸出的頁面產生 `dist/engagement-pages.json`，並與 GitHub Pages 一起公開於 `https://bradcocox.github.io/brad-log/engagement-pages.json`。
 
-清單包含 `pages` 與 `articles`：前者是允許統計的頁面，後者是允許按讚／留言的文章。只有正式公開頁面才加入；草稿、404、查詢字串、任意外部網址及尚未存在的文章不能作為無限制的新資料鍵。標示 `engagement-exclude` 的 QA 頁面也不加入。正常新增文章後，Pages 的新清單會讓後端認得該頁，不需要每次新增文章都重部署 Worker。
+清單包含 `pages` 與 `articles`：前者是允許統計的頁面，後者是允許按讚／留言的文章。只有正式公開頁面才加入；草稿、404、查詢字串、任意外部網址及尚未存在的文章不得作為新資料鍵。標示 `engagement-exclude` 的 QA 頁面也不加入。
 
-首次準備 Worker 或更新離線備援清單時，在已完成 `pnpm build` 的 repo 根目錄執行：
+**2026-11-23 根因修正：** 雲端 Worker 不再執行時連線回 GitHub Pages 抓清單。因為該連線曾回 HTTP 503，但正式 Actions 現在已能同時部署兩端，所以每次 `main` 發布會將**同一次 build artifact 的正式清單**寫入 Worker bundle。這避免了執行階段的跨平台網路相依性；新增文章、移除文章都必須透過完整 Actions 發布，不能只手動更新 GitHub Pages。
+
+供本機或手動 Worker bundle 使用時，在已完成 `pnpm build` 的 repo 根目錄執行：
 
 ```sh
 pnpm engagement:manifest
 ```
 
-這會更新 `backend/allowed-pages.json`，供 Worker bundle 在無法取得公開清單時使用。**目前內建備援中的頁面仍會被接受**：若要撤下曾經加入備援的頁面／文章，必須同步更新備援清單並重部署 Worker，不能只刪除公開文章就假設 API 一併拒絕。這些清單是公開路徑，不含使用者資料或秘密。
+這會將該次建置的清單同步至 `backend/allowed-pages.json`。正式 CI 部署不依賴這個檔案是否已提交最新版本，而是從同次建置 artifact 複製清單後打包 Worker，保證一致。過去的「離線備援」現在就是**唯一可信且隨部署更新的允許清單**；撤下文章時也會由新 bundle 移除，不會保留舊白名單的文章。
 
 在 repo 根目錄開啟終端機，先進入 `backend/`，再執行：
 
@@ -185,19 +187,17 @@ npm run bundle
 
 後續改後端時，先修改 repo 的來源，重新跑 `npm test`、`npm run bundle`，再把新的完整 bundle 貼入 Dashboard 並部署；不用重建 D1，也不要重設計數。只在 Dashboard 改程式卻沒有更新 repo，會使下次部署蓋掉線上修正。**Dashboard 的變數、secret、binding 與 cron 不會因本機產生 bundle 就自動設定。** 官方 binding／Edit Code 操作見 [D1 remote development](https://developers.cloudflare.com/d1/best-practices/remote-development/)。
 
-### 7.3 日後可選的 GitHub 自動部署：本次未使用
+### 7.3 GitHub Actions 自動部署與嚴格驗收：已配置並使用
 
-目前沒有配置此路徑，**不能直接拿 repo 中的 Wrangler 模板部署正式服務**。若日後改用 Git，先完成下列設定核對，再啟用自動發布：
+`.github/workflows/deploy.yml` 在同一次 build 成功後：
 
-1. 先盤點第 4 節的 Production 設定，決定自動部署如何保留正確 `DB` binding、兩個 runtime secrets、`FEATURES_ENABLED`、cron、相容性日期與關閉的 Observability。現在的 placeholder 模板不能還原這些實際設定；不要把實際 account ID、Email 或 database UUID 寫入公開 repo。
-2. 透過 Workers & Pages 匯入既有 Git repository。若決定授權 Cloudflare GitHub 整合，只選 **`bradcocox/brad-log`**，檢查當下要求的最小權限，不選所有 repositories；這是未來可選的授權，並非本次已安裝。
-3. Production branch 使用 `main`；root directory 為 **`backend`**，Worker 名稱為 `brad-log-community`。先完成可安全管理既有 Production 設定的部署配置，才執行 Wrangler；不以未填寫的模板嘗試碰運氣部署。
-4. 核對並釘選實際使用的 Wrangler 版本。Repo 目前沒有 `npm run deploy` 指令，不能把它當成已建好的發布流程。前端建置不需要 Cloudflare API token，兩個秘密仍只放 Worker runtime secrets。
-5. 先驗證自動部署不會將 `FEATURES_ENABLED` 從 `true` 蓋回 `false`，也不會移除或替換 `DB` binding；再核對正式 URL、cron、Compatibility date、secret 存在狀態與 Workers Free。只見 build 成功不代表設定正確。
+1. 部署 GitHub Pages 並保存相同的 `engagement-pages.json` 作為 Actions artifact。
+2. 若 Repository Variable `CLOUDFLARE_WORKER_DEPLOY_ENABLED=true`，使用必要的 GitHub Actions secrets（`CLOUDFLARE_API_TOKEN`、`CLOUDFLARE_ACCOUNT_ID`、`CLOUDFLARE_D1_DATABASE_ID`）重新打包和部署現有 `brad-log-community` Worker。Wrangler 執行時配置為暫存檔，不把資料庫 ID、帳戶 ID 或 API Token 提交到公開程式庫。原有 `DB`、runtime 加密 secrets、`FEATURES_ENABLED` 變數和 cron 不會刻意重設。
+3. **最後的 `verify-interactions` 必須嚴格通過**：公開 Pages manifest 與此次建置清單逐項相同；Worker 的 `/health/manifest` 回傳 `source: "deploy-bundle"`、正確頁數／文章數和完全一致的 SHA-256；對每篇文章真實讀取按讚與留言 API。任一項不一致即判失敗，**不能只因為備援還可讀，就把無法同步的部署標成成功**。
 
-這裡的 `backend/` 是同一個 repo 的後端子目錄，GitHub Pages 仍照原本的 workflow 建置文章。可以限制後端自動建置的監看路徑，避免單純修改文章就不必要地建置後端；公開 manifest 會支援新增頁面，後端程式或內建備援清單改變時才需要部署 Worker。
+既然公開頁面和 Worker 統一由 Actions 發布，Worker 不需要在每個請求時再次向 GitHub Pages 下載清單。若 GitHub Pages 成功但 Worker 未更新、Token 過期或清單不一致，最後的驗收都會失敗。不要以單獨的網站 build 成功當成社群功能已部署。
 
-官方文件：[Dashboard 建置與免費 workers.dev](https://developers.cloudflare.com/workers/get-started/dashboard/)；[GitHub integration](https://developers.cloudflare.com/workers/ci-cd/builds/git-integration/github-integration/)；[Workers Builds 免費額度](https://developers.cloudflare.com/workers/ci-cd/builds/limits-and-pricing/)。
+Worker 的 `/health` 只檢查配置和 D1；`/health/manifest` 檢查部署內嵌的允許清單是否有效，並提供它的 SHA-256。完整診斷與升級背景見 [根因修復紀錄](ENGAGEMENT_ROOT_CAUSE_FIX.md)。
 
 ### 7.4 本次 runtime 相容性修正
 

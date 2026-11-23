@@ -1,29 +1,25 @@
 # Brad.log 留言／按讚根因修復（2026-11-23）
 
-## 已確認的設計缺口
+## 根本原因與最終設計
 
-GitHub Pages 每次透過 Actions 發布文章，但 Cloudflare Worker 原先採 Dashboard 手動部署。倘若 Worker 從固定來源 `/brad-log/engagement-pages.json` 讀取失敗，內建 `backend/allowed-pages.json` 只有首篇文章，新增文章會得到 `404 unknown_page`。之前部署成功只驗證了 HTML，沒有逐篇驗證留言 API。
+問題起初是 GitHub Pages 新文章已發布，但 Cloudflare Worker 仍使用只包含舊文章的 allowlist。初步方案加入 Worker 從公開 `engagement-pages.json` 執行時下載，卻在正式環境持續回 `/health/manifest` HTTP 503；即使舊 bundle 的按讚和留言讀取可用，這也是服務相依性問題，**不能將驗收 stage 標為成功**。
 
-## 新的發布契約
+目前的最終架構已**取消 Worker 執行時跨網域抓取清單**，改成原子化發布契約：
 
-1. 建置從正式 Astro HTML 輸出產生 `dist/engagement-pages.json`；Actions 把**這份實際發布的清單**留作短期 artifact。
-2. GitHub Pages 成功發布後，若已授權 Cloudflare CI，使用同一份 manifest 建構 Worker fallback，並更新既有正式 Worker，無需重設 D1 或重置統計。
-3. Worker 動態讀取同一個固定網域的公開清單，驗證大小、頁面合法性和文章路徑；成功快取五分鐘，失敗保留最近已驗證清單、三十秒後重試。不能讓訪客指定任意 outbound URL。
-4. `GET /health/manifest` 顯示清單同步狀態及文章數，不公開秘密。讀取失敗返回 HTTP 503。
-5. 發布後 `verify-interactions` 會檢查公開清單與本次建置一致，再逐篇呼叫 `GET /v1/comments`。任何 `unknown_page` 都會把此次 Actions 驗收標成失敗，不能再出現「發布成功但無法留言」的假綠燈。
+1. GitHub Actions `build` 從 Astro 已輸出的 HTML 產生 `dist/engagement-pages.json`。
+2. `deploy` 將該次網站與清單發布到 GitHub Pages。
+3. `deploy-community-worker` **下載同一份 build artifact**，產生 Worker 的 bundled allowlist，使用 Cloudflare Token 與指定 D1 database ID 部署既有 Worker。
+4. `verify-interactions` 逐項比較公開 Pages manifest 與建置 manifest，讀取 Worker `GET /health/manifest`，驗證 `source: "deploy-bundle"`、數量與**完整清單的 SHA-256 校驗碼**，並逐篇讀取留言和按讚 API。任何缺文、陳舊 bundle、API 失敗，都必須讓工作流程失敗。
 
-## 一次性授權：Cloudflare Worker 自動部署
+這不再有「即時抓取失敗但備援正常，綠燈卻留下故障」的灰色狀態。新文章要能互動，必須與同次 build 的 Worker 一起成功部署。即使一個新文章不存在，後端仍會拒絕 `unknown_page`；不能藉任意外部 URL 建立互動資料。
 
-在 GitHub `bradcocox/brad-log` → Settings → Secrets and variables → Actions：
+## 權限和資料保護
 
-- 新增 **repository secrets**：`CLOUDFLARE_API_TOKEN`（僅限此 Cloudflare 帳戶的 Workers 編輯權限）、`CLOUDFLARE_ACCOUNT_ID`、`CLOUDFLARE_D1_DATABASE_ID`。
-- 確認現有 Cloudflare Production 的 Worker `brad-log-community` 已有 D1 `DB`、加密的 `SIGNING_SECRET`／`TURNSTILE_SECRET` 和現有 `FEATURES_ENABLED` 設定。
-- 最後新增 **repository variable**：`CLOUDFLARE_WORKER_DEPLOY_ENABLED`，值為 `true`。
+正式部署只使用 GitHub Actions repository secrets（`CLOUDFLARE_API_TOKEN`、`CLOUDFLARE_ACCOUNT_ID`、`CLOUDFLARE_D1_DATABASE_ID`）與 repository variable `CLOUDFLARE_WORKER_DEPLOY_ENABLED=true`。D1 binding 為 `DB`，沿用既有 Worker 的 `SIGNING_SECRET` 和 `TURNSTILE_SECRET` 加密變數；不重設既有留言、按讚或統計資料。檢查只進行 GET，不替讀者按讚或送出留言。
 
-未提供前述授權時，Worker job 會跳過，**不能宣稱正式互動服務已修好**；發布後驗收仍會檢查並顯示異常。這些 ID／Token 不寫在公開 repo，`backend/scripts/prepare-production-config.mjs` 只在 CI 產生暫存設定；`keep_vars:true` 保留現有 Production 變數和加密 secrets，不把 Wrangler 範本的 `FEATURES_ENABLED:false` 覆蓋到線上。
+正式 Worker 健康檢查：
 
-完成一次設定後，可從 Actions → Publish Brad.log → Run workflow 重新部署；往後每次 `main` 發文會自動同步文章清單與更新 Worker。
+- `/health`：設定與 D1 是否可用。
+- `/health/manifest`：`status: "ok"`、`source: "deploy-bundle"`、`pages`、`articles`、`sha256`。最後一個值必須與公開 Pages 清單和此次建置計算的 SHA-256 完全相同。
 
-請勿手動清空 D1 或關閉 Turnstile。測試只讀取公開清單與已核准留言列表，不會創造測試留言、按讚或流量脈衝。
-
-官方參考：https://developers.cloudflare.com/workers/ci-cd/external-cicd/github-actions/
+主要維護手冊：[ENGAGEMENT_SETUP.md](ENGAGEMENT_SETUP.md)。若最後 stage 失敗，應查看哪個條件失敗，而非直接放寬驗收或只重跑同一個舊 workflow attempt。

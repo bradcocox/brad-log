@@ -80,105 +80,45 @@ function safePagePath(value) {
     new URL(value, ORIGIN).pathname === value;
 }
 
-function createManifestLookup(manifestFetch, now) {
-  // The last validated manifest survives temporary GitHub Pages outages.
-  // Failed fetches retry in 30 seconds, instead of blocking new posts for 5 minutes.
-  let cache = {
-    expires: 0, pages: new Set(), articles: new Set(),
-    lastSuccess: null, remoteAvailable: false,
-  };
-  let pending;
+// The trusted allowlist is bundled from the SAME artifact deployed to Pages.
+// There is no runtime dependency on Workers fetching GitHub Pages (which can
+// fail independently); CI verifies an exact hash match after each deployment.
+const bundledManifestValid = Array.isArray(manifest.pages) &&
+  Array.isArray(manifest.articles) &&
+  manifest.pages.length > 0 && manifest.pages.length <= 1_000 &&
+  manifest.articles.length <= 1_000 &&
+  manifest.pages.length === pages.size &&
+  manifest.articles.length === articles.size &&
+  pages.has("/brad-log/") &&
+  manifest.pages.every(safePagePath) &&
+  manifest.articles.every(path =>
+    safePagePath(path) && path.startsWith("/brad-log/posts/") && pages.has(path)
+  );
+let manifestDigest;
 
-  async function refresh() {
-    if (cache.expires > now()) return;
-    if (!pending) {
-      pending = (async () => {
-        try {
-          // Never construct an outbound URL from a visitor-controlled value.
-          const response = await manifestFetch(`${ORIGIN}/brad-log/engagement-pages.json`, {
-            signal: AbortSignal.timeout(5_000),
-            redirect: "error",
-            headers: { Accept: "application/json", "Cache-Control": "no-cache" },
-          });
-          if (!response.ok || !response.body ||
-              Number(response.headers.get("Content-Length")) > 65_536) {
-            throw new Error("Manifest unavailable");
-          }
-          const reader = response.body.getReader();
-          let size = 0;
-          const chunks = [];
-          try {
-            while (true) {
-              const { done, value: chunk } = await reader.read();
-              if (done) break;
-              size += chunk.byteLength;
-              if (size > 65_536) {
-                await reader.cancel();
-                throw new Error("Manifest too large");
-              }
-              chunks.push(chunk);
-            }
-          } finally {
-            reader.releaseLock();
-          }
-          const bytes = new Uint8Array(size);
-          let offset = 0;
-          for (const chunk of chunks) {
-            bytes.set(chunk, offset);
-            offset += chunk.byteLength;
-          }
-          const data = JSON.parse(
-            new TextDecoder("utf-8", { fatal: true, ignoreBOM: false }).decode(bytes)
-          );
-          if (!Array.isArray(data.pages) || !Array.isArray(data.articles) ||
-              data.pages.length > 1_000 || data.articles.length > 1_000 ||
-              !data.pages.every(safePagePath) || !data.articles.every(safePagePath)) {
-            throw new Error("Invalid manifest");
-          }
-          const nextPages = new Set(data.pages);
-          if (!nextPages.has("/brad-log/") ||
-              !data.articles.every(path => path.startsWith("/brad-log/posts/") && nextPages.has(path))) {
-            throw new Error("Invalid article manifest");
-          }
-          cache = {
-            expires: now() + 5 * MINUTE,
-            pages: nextPages,
-            articles: new Set(data.articles),
-            lastSuccess: now(),
-            remoteAvailable: true,
-          };
-        } catch {
-          // No arbitrary URL gets accepted after a failed or malformed fetch.
-          cache = { ...cache, expires: now() + 30_000, remoteAvailable: false };
-        }
-      })().finally(() => { pending = undefined; });
-    }
-    await pending;
+async function bundledManifestHealth() {
+  if (!bundledManifestValid) throw unavailable();
+  if (!manifestDigest) {
+    const canonical = JSON.stringify({
+      pages: [...pages].sort(),
+      articles: [...articles].sort(),
+    });
+    manifestDigest = crypto.subtle.digest("SHA-256", encoder.encode(canonical))
+      .then(bytes => [...new Uint8Array(bytes)]
+        .map(byte => byte.toString(16).padStart(2, "0")).join(""));
   }
-
-  async function lookup(value, isArticle) {
-    await refresh();
-    return (isArticle ? cache.articles : cache.pages).has(value);
-  }
-  lookup.status = async () => {
-    await refresh();
-    return {
-      status: cache.remoteAvailable ? "ok" : "degraded",
-      source: cache.remoteAvailable ? "published-manifest" : "bundled-fallback",
-      remoteAvailable: cache.remoteAvailable,
-      lastSuccessAt: cache.lastSuccess === null ? null : new Date(cache.lastSuccess).toISOString(),
-      remotePages: cache.pages.size,
-      remoteArticles: cache.articles.size,
-      bundledPages: pages.size,
-      bundledArticles: articles.size,
-    };
+  return {
+    status: "ok",
+    source: "deploy-bundle",
+    pages: pages.size,
+    articles: articles.size,
+    sha256: await manifestDigest,
   };
-  return lookup;
 }
 
-async function requirePage(value, isArticle = false, lookup) {
-  if (!safePagePath(value) ||
-      (!(isArticle ? articles : pages).has(value) && !(lookup && await lookup(value, isArticle)))) {
+async function requirePage(value, isArticle = false) {
+  if (!safePagePath(value) || !bundledManifestValid ||
+      !(isArticle ? articles : pages).has(value)) {
     throw new ApiError(404, "unknown_page", "找不到這個頁面的互動資料。");
   }
   return value;
@@ -320,8 +260,8 @@ async function getStats(env, pageId, now) {
   return { ...result, activeWindowSeconds: ACTIVE_WINDOW_SECONDS, asOf: new Date(now).toISOString() };
 }
 
-async function pulse(request, env, data, now, lookup) {
-  const pageId = await requirePage(data.pageId, false, lookup);
+async function pulse(request, env, data, now) {
+  const pageId = await requirePage(data.pageId, false);
   const sessionId = requireUuid(data.sessionId, "sessionId");
   if (typeof data.visible !== "boolean") throw invalid();
   const viewId = data.viewId === undefined ? null : requireUuid(data.viewId, "viewId");
@@ -357,8 +297,8 @@ async function getReaction(env, articleId, visitorToken) {
   return { likes: result.likes, liked: result.liked === 1 };
 }
 
-async function setReaction(request, env, data, now, verifyFetch, lookup) {
-  const articleId = await requirePage(data.articleId, true, lookup);
+async function setReaction(request, env, data, now, verifyFetch) {
+  const articleId = await requirePage(data.articleId, true);
   const visitorToken = requireUuid(data.visitorToken, "visitorToken");
   if (typeof data.liked !== "boolean") throw invalid();
   await rateLimit(request, env, "reactionWrite", now);
@@ -430,8 +370,8 @@ function commentText(data) {
   return { nickname, body };
 }
 
-async function createComment(request, env, data, now, verifyFetch, lookup) {
-  const articleId = await requirePage(data.articleId, true, lookup);
+async function createComment(request, env, data, now, verifyFetch) {
+  const articleId = await requirePage(data.articleId, true);
   const mutationId = requireUuid(data.clientMutationId, "clientMutationId");
   const { nickname, body } = commentText(data);
   await rateLimit(request, env, "commentsWrite", now);
@@ -472,8 +412,7 @@ async function cleanup(env, now) {
 }
 
 // Dependency injection is only a local test seam; callers cannot choose these values.
-export function createWorker({ now = () => Date.now(), verifyFetch = fetch, manifestFetch = fetch } = {}) {
-  const lookup = createManifestLookup(manifestFetch, now);
+export function createWorker({ now = () => Date.now(), verifyFetch = fetch } = {}) {
   return {
     async fetch(request, env) {
       try {
@@ -504,30 +443,29 @@ export function createWorker({ now = () => Date.now(), verifyFetch = fetch, mani
         const time = now();
         if (request.method === "GET" && url.pathname === "/health/manifest") {
           await rateLimit(request, env, "stats", time);
-          const status = await lookup.status();
-          return reply(request, status, status.remoteAvailable ? 200 : 503);
+          return reply(request, await bundledManifestHealth());
         }
         if (request.method === "POST" && url.pathname === "/v1/pulse") {
           requireOrigin(request);
-          return reply(request, await pulse(request, env, await readJson(request), time, lookup));
+          return reply(request, await pulse(request, env, await readJson(request), time));
         }
         if (request.method === "GET" && url.pathname === "/v1/stats") {
-          const pageId = await requirePage(url.searchParams.get("pageId"), false, lookup);
+          const pageId = await requirePage(url.searchParams.get("pageId"), false);
           await rateLimit(request, env, "stats", time);
           return reply(request, await getStats(env, pageId, time));
         }
         if (request.method === "GET" && url.pathname === "/v1/reaction") {
-          const articleId = await requirePage(url.searchParams.get("articleId"), true, lookup);
+          const articleId = await requirePage(url.searchParams.get("articleId"), true);
           const token = requireUuid(url.searchParams.get("visitorToken"), "visitorToken");
           await rateLimit(request, env, "reactionRead", time);
           return reply(request, await getReaction(env, articleId, token));
         }
         if (request.method === "PUT" && url.pathname === "/v1/reaction") {
           requireOrigin(request);
-          return reply(request, await setReaction(request, env, await readJson(request), time, verifyFetch, lookup));
+          return reply(request, await setReaction(request, env, await readJson(request), time, verifyFetch));
         }
         if (request.method === "GET" && url.pathname === "/v1/comments") {
-          const articleId = await requirePage(url.searchParams.get("articleId"), true, lookup);
+          const articleId = await requirePage(url.searchParams.get("articleId"), true);
           const cursor = url.searchParams.get("cursor");
           decodeCursor(cursor);
           await rateLimit(request, env, "commentsRead", time);
@@ -535,7 +473,7 @@ export function createWorker({ now = () => Date.now(), verifyFetch = fetch, mani
         }
         if (request.method === "POST" && url.pathname === "/v1/comments") {
           requireOrigin(request);
-          return reply(request, await createComment(request, env, await readJson(request), time, verifyFetch, lookup), 202);
+          return reply(request, await createComment(request, env, await readJson(request), time, verifyFetch), 202);
         }
         throw new ApiError(404, "not_found", "找不到這個服務。");
       } catch (error) {

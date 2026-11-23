@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { DatabaseSync } from "node:sqlite";
 import { readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
 import { createWorker } from "../worker.mjs";
 
 const ORIGIN = "https://bradcocox.github.io";
@@ -51,12 +52,11 @@ class D1TestDatabase {
   close() { this.raw.close(); }
 }
 
-function fixture(t, options = {}) {
+function fixture(t) {
   const db = new D1TestDatabase();
   t.after(() => db.close());
   let clock = NOW;
   const verificationCalls = [];
-  const manifestCalls = [];
   const consumedTokens = new Set();
   const env = {
     DB: db,
@@ -80,11 +80,6 @@ function fixture(t, options = {}) {
         challenge_ts: new Date(clock - (mode === "expired" ? 400_000 : 1_000)).toISOString(),
       });
     },
-    manifestFetch: async (url, request) => {
-      manifestCalls.push({ url, request });
-      if (options.manifest) return Response.json(options.manifest());
-      throw new Error("Offline test manifest");
-    },
   });
   async function call(path, method = "GET", data = undefined, options = {}) {
     const headers = new Headers({ Origin: ORIGIN, "CF-Connecting-IP": "192.0.2.10", ...options.headers });
@@ -100,7 +95,7 @@ function fixture(t, options = {}) {
     return { status: response.status, headers: response.headers, data: text ? JSON.parse(text) : null, text };
   }
   return {
-    db, env, worker, call, verificationCalls, manifestCalls,
+    db, env, worker, call, verificationCalls,
     advance(milliseconds) { clock += milliseconds; },
     time: () => clock,
   };
@@ -188,9 +183,10 @@ test("unknown paths and invalid identities cannot create database rows or arbitr
   assert.equal((await f.call("/v1/pulse", "POST", pulseData({ sessionId: "not-an-id" }))).status, 400);
   assert.equal(f.db.count("presence"), 0);
   assert.equal(f.db.count("view_events"), 0);
-  assert.equal(f.manifestCalls.length, 1);
-  assert.equal(f.manifestCalls[0].url, `${ORIGIN}/brad-log/engagement-pages.json`);
-  assert.equal(f.manifestCalls[0].request.redirect, "error");
+  // Arbitrary paths are rejected locally; no runtime fetch to a visitor URL.
+  const manifestHealth = await f.call("/health/manifest");
+  assert.equal(manifestHealth.status, 200);
+  assert.equal(manifestHealth.data.source, "deploy-bundle");
 });
 
 test("view retries and concurrent duplicate requests increment cumulative and daily totals exactly once", async t => {
@@ -367,63 +363,35 @@ test("temporary identifiers expire without deleting aggregate history or approve
   assert.equal(f.db.raw.prepare("SELECT visits FROM page_daily").get().visits, 1);
 });
 
-test("newly published pages become valid through the trusted bounded manifest without worker redeployment", async t => {
-  const fresh = "/brad-log/posts/a-new-lesson/";
-  let remote = { pages: [HOME, PAGE], articles: [PAGE] };
-  const f = fixture(t, { manifest: () => remote });
-  assert.equal((await f.call("/v1/pulse", "POST", pulseData({ pageId: fresh }))).status, 404);
-  remote = { pages: [HOME, PAGE, fresh], articles: [PAGE, fresh] };
-  assert.equal((await f.call("/v1/pulse", "POST", pulseData({ pageId: fresh }))).status, 404);
-  f.advance(5 * 60_000 + 1);
-  assert.equal((await f.call("/v1/pulse", "POST", pulseData({ pageId: fresh }))).status, 200);
-  assert.equal((await f.call("/v1/comments", "POST", commentData({ articleId: fresh }))).status, 202);
-  assert.equal(f.manifestCalls.length, 2);
+test("bundled manifest health proves its EXACT allowlist, not a weak count or remote availability flag", async t => {
+  const f = fixture(t);
+  const expected = JSON.parse(readFileSync(new URL("../allowed-pages.json", import.meta.url), "utf8"));
+  const canonical = JSON.stringify({
+    pages: [...expected.pages].sort(),
+    articles: [...expected.articles].sort(),
+  });
+  const digest = createHash("sha256").update(canonical).digest("hex");
+  const result = await f.call("/health/manifest");
+  assert.equal(result.status, 200);
+  assert.deepEqual(result.data, {
+    status: "ok",
+    source: "deploy-bundle",
+    pages: expected.pages.length,
+    articles: expected.articles.length,
+    sha256: digest,
+  });
+  for (const article of expected.articles) {
+    assert.equal((await f.call(`/v1/comments?articleId=${article}`)).status, 200);
+    const read = await f.call(`/v1/reaction?articleId=${article}&visitorToken=${crypto.randomUUID()}`);
+    assert.equal(read.status, 200);
+  }
 });
 
-test("invalid or oversized remote manifests fail closed while existing bundled pages keep working", async t => {
-  const fresh = "/brad-log/posts/unsafe-remote/";
-  const invalid = fixture(t, { manifest: () => ({ pages: [fresh], articles: ["https://attacker.invalid/"] }) });
-  assert.equal((await invalid.call("/v1/pulse", "POST", pulseData({ pageId: fresh }))).status, 404);
-  assert.equal((await invalid.call("/v1/pulse", "POST", pulseData())).status, 200);
-  const huge = fixture(t, { manifest: () => ({ pages: [fresh], articles: [fresh], extra: "x".repeat(70_000) }) });
-  assert.equal((await huge.call("/v1/pulse", "POST", pulseData({ pageId: fresh }))).status, 404);
-  const tooMany = fixture(t, { manifest: () => ({ pages: Array.from({ length: 1_001 }, () => fresh), articles: [fresh] }) });
-  assert.equal((await tooMany.call("/v1/pulse", "POST", pulseData({ pageId: fresh }))).status, 404);
-});
-
-test("manifest health shows a fetch outage while keeping the last trusted list", async t => {
-  const fresh = "/brad-log/posts/manifest-health-test/";
-  let remote = { pages: [HOME, PAGE, fresh], articles: [PAGE, fresh] };
-  const f = fixture(t, { manifest: () => {
-    if (!remote) throw new Error("Pages outage");
-    return remote;
-  } });
-  const healthy = await f.call("/health/manifest");
-  assert.equal(healthy.status, 200);
-  assert.equal(healthy.data.status, "ok");
-  assert.equal(healthy.data.source, "published-manifest");
-  assert.ok(healthy.data.remoteArticles >= 2);
-  assert.equal((await f.call(`/v1/comments?articleId=${fresh}`)).status, 200);
-  remote = null;
-  f.advance(5 * 60_000 + 1);
-  const outage = await f.call("/health/manifest");
-  assert.equal(outage.status, 503);
-  assert.equal(outage.data.source, "bundled-fallback");
-  assert.equal(outage.data.remoteAvailable, false);
-  assert.equal((await f.call(`/v1/comments?articleId=${fresh}`)).status, 200);
-  assert.equal((await f.call("/v1/comments?articleId=/brad-log/posts/not-real/")).status, 404);
-});
-
-test("a failed manifest fetch retries in 30 seconds rather than 5 minutes", async t => {
-  const fresh = "/brad-log/posts/late-publication/";
-  let remote = null;
-  const f = fixture(t, { manifest: () => {
-    if (!remote) throw new Error("Temporary outage");
-    return remote;
-  } });
-  assert.equal((await f.call(`/v1/comments?articleId=${fresh}`)).status, 404);
-  remote = { pages: [HOME, PAGE, fresh], articles: [PAGE, fresh] };
-  f.advance(30_001);
-  assert.equal((await f.call(`/v1/comments?articleId=${fresh}`)).status, 200);
-  assert.equal(f.manifestCalls.length, 2);
+test("unknown articles stay denied even if they look like valid Blog URLs", async t => {
+  const f = fixture(t);
+  const unknown = "/brad-log/posts/unpublished-tutorial/";
+  assert.equal((await f.call(`/v1/comments?articleId=${unknown}`)).status, 404);
+  assert.equal((await f.call("/v1/comments?articleId=https://attacker.invalid/")).status, 404);
+  assert.equal((await f.call("/v1/pulse", "POST", pulseData({ pageId: unknown }))).status, 404);
+  assert.equal(f.db.count("comments"), 0);
 });
