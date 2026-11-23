@@ -11,7 +11,20 @@
     "/brad-log/categories/devops-cloud/",
     "/brad-log/categories/system-design/",
     "/brad-log/posts/",
+    "/brad-log/posts/airflow-34-task-loops-ai-agents/",
+    "/brad-log/posts/claude-code-router-beginner-guide/",
+    "/brad-log/posts/cline-beginner-guide/",
+    "/brad-log/posts/codex-router-beginner-guide/",
+    "/brad-log/posts/coding-agent-router-comparison/",
+    "/brad-log/posts/duckdb-2-server-agent-variant-guide/",
     "/brad-log/posts/github-pages-astropaper-guide/",
+    "/brad-log/posts/kilo-code-beginner-guide/",
+    "/brad-log/posts/opencode-beginner-guide/",
+    "/brad-log/posts/polars-2-streaming-order-guide/",
+    "/brad-log/posts/t3-code-architecture/",
+    "/brad-log/posts/t3-code-comparison/",
+    "/brad-log/posts/t3-code-overview/",
+    "/brad-log/posts/t3-code-quickstart/",
     "/brad-log/privacy/",
     "/brad-log/search/",
     "/brad-log/tags/",
@@ -21,6 +34,19 @@
     "/brad-log/tags/github-pages/"
   ],
   "articles": [
-    "/brad-log/posts/github-pages-astropaper-guide/"
+    "/brad-log/posts/airflow-34-task-loops-ai-agents/",
+    "/brad-log/posts/claude-code-router-beginner-guide/",
+    "/brad-log/posts/cline-beginner-guide/",
+    "/brad-log/posts/codex-router-beginner-guide/",
+    "/brad-log/posts/coding-agent-router-comparison/",
+    "/brad-log/posts/duckdb-2-server-agent-variant-guide/",
+    "/brad-log/posts/github-pages-astropaper-guide/",
+    "/brad-log/posts/kilo-code-beginner-guide/",
+    "/brad-log/posts/opencode-beginner-guide/",
+    "/brad-log/posts/polars-2-streaming-order-guide/",
+    "/brad-log/posts/t3-code-architecture/",
+    "/brad-log/posts/t3-code-comparison/",
+    "/brad-log/posts/t3-code-overview/",
+    "/brad-log/posts/t3-code-quickstart/"
   ]
 }

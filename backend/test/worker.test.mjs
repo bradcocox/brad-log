@@ -390,3 +390,40 @@ test("invalid or oversized remote manifests fail closed while existing bundled p
   const tooMany = fixture(t, { manifest: () => ({ pages: Array.from({ length: 1_001 }, () => fresh), articles: [fresh] }) });
   assert.equal((await tooMany.call("/v1/pulse", "POST", pulseData({ pageId: fresh }))).status, 404);
 });
+
+test("manifest health shows a fetch outage while keeping the last trusted list", async t => {
+  const fresh = "/brad-log/posts/manifest-health-test/";
+  let remote = { pages: [HOME, PAGE, fresh], articles: [PAGE, fresh] };
+  const f = fixture(t, { manifest: () => {
+    if (!remote) throw new Error("Pages outage");
+    return remote;
+  } });
+  const healthy = await f.call("/health/manifest");
+  assert.equal(healthy.status, 200);
+  assert.equal(healthy.data.status, "ok");
+  assert.equal(healthy.data.source, "published-manifest");
+  assert.ok(healthy.data.remoteArticles >= 2);
+  assert.equal((await f.call(`/v1/comments?articleId=${fresh}`)).status, 200);
+  remote = null;
+  f.advance(5 * 60_000 + 1);
+  const outage = await f.call("/health/manifest");
+  assert.equal(outage.status, 503);
+  assert.equal(outage.data.source, "bundled-fallback");
+  assert.equal(outage.data.remoteAvailable, false);
+  assert.equal((await f.call(`/v1/comments?articleId=${fresh}`)).status, 200);
+  assert.equal((await f.call("/v1/comments?articleId=/brad-log/posts/not-real/")).status, 404);
+});
+
+test("a failed manifest fetch retries in 30 seconds rather than 5 minutes", async t => {
+  const fresh = "/brad-log/posts/late-publication/";
+  let remote = null;
+  const f = fixture(t, { manifest: () => {
+    if (!remote) throw new Error("Temporary outage");
+    return remote;
+  } });
+  assert.equal((await f.call(`/v1/comments?articleId=${fresh}`)).status, 404);
+  remote = { pages: [HOME, PAGE, fresh], articles: [PAGE, fresh] };
+  f.advance(30_001);
+  assert.equal((await f.call(`/v1/comments?articleId=${fresh}`)).status, 200);
+  assert.equal(f.manifestCalls.length, 2);
+});

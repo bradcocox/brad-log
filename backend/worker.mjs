@@ -81,64 +81,99 @@ function safePagePath(value) {
 }
 
 function createManifestLookup(manifestFetch, now) {
-  let cache = { expires: 0, pages: new Set(), articles: new Set() };
-  let pending;
-  return async function lookup(value, isArticle) {
-    if (cache.expires <= now()) {
-      if (!pending) {
-        pending = (async () => {
-          // A fixed first-party URL prevents caller-controlled outbound requests.
-          const next = { expires: now() + 5 * MINUTE, pages: new Set(), articles: new Set() };
-          try {
-            const response = await manifestFetch(`${ORIGIN}/brad-log/engagement-pages.json`, {
-              signal: AbortSignal.timeout(5_000),
-              redirect: "error",
-            });
-            if (!response.ok || !response.body || Number(response.headers.get("Content-Length")) > 65_536) {
-              throw new Error("Manifest unavailable");
-            }
-            const reader = response.body.getReader();
-            let size = 0;
-            const chunks = [];
-            try {
-              while (true) {
-                const { done, value: chunk } = await reader.read();
-                if (done) break;
-                size += chunk.byteLength;
-                if (size > 65_536) {
-                  await reader.cancel();
-                  throw new Error("Manifest too large");
-                }
-                chunks.push(chunk);
-              }
-            } finally {
-              reader.releaseLock();
-            }
-            const bytes = new Uint8Array(size);
-            let offset = 0;
-            for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.byteLength; }
-            const data = JSON.parse(new TextDecoder("utf-8", { fatal: true, ignoreBOM: false }).decode(bytes));
-            if (!Array.isArray(data.pages) || !Array.isArray(data.articles) ||
-                data.pages.length > 1_000 || data.articles.length > 1_000 ||
-                !data.pages.every(safePagePath) || !data.articles.every(safePagePath)) {
-              throw new Error("Invalid manifest");
-            }
-            const candidatePages = new Set(data.pages);
-            if (!data.articles.every(path => path.startsWith("/brad-log/posts/") && candidatePages.has(path))) {
-              throw new Error("Invalid article manifest");
-            }
-            next.pages = candidatePages;
-            next.articles = new Set(data.articles);
-          } catch {
-            // Existing bundled pages keep working when GitHub Pages cannot be reached.
-          }
-          cache = next;
-        })().finally(() => { pending = undefined; });
-      }
-      await pending;
-    }
-    return (isArticle ? cache.articles : cache.pages).has(value);
+  // The last validated manifest survives temporary GitHub Pages outages.
+  // Failed fetches retry in 30 seconds, instead of blocking new posts for 5 minutes.
+  let cache = {
+    expires: 0, pages: new Set(), articles: new Set(),
+    lastSuccess: null, remoteAvailable: false,
   };
+  let pending;
+
+  async function refresh() {
+    if (cache.expires > now()) return;
+    if (!pending) {
+      pending = (async () => {
+        try {
+          // Never construct an outbound URL from a visitor-controlled value.
+          const response = await manifestFetch(`${ORIGIN}/brad-log/engagement-pages.json`, {
+            signal: AbortSignal.timeout(5_000),
+            redirect: "error",
+            headers: { Accept: "application/json", "Cache-Control": "no-cache" },
+          });
+          if (!response.ok || !response.body ||
+              Number(response.headers.get("Content-Length")) > 65_536) {
+            throw new Error("Manifest unavailable");
+          }
+          const reader = response.body.getReader();
+          let size = 0;
+          const chunks = [];
+          try {
+            while (true) {
+              const { done, value: chunk } = await reader.read();
+              if (done) break;
+              size += chunk.byteLength;
+              if (size > 65_536) {
+                await reader.cancel();
+                throw new Error("Manifest too large");
+              }
+              chunks.push(chunk);
+            }
+          } finally {
+            reader.releaseLock();
+          }
+          const bytes = new Uint8Array(size);
+          let offset = 0;
+          for (const chunk of chunks) {
+            bytes.set(chunk, offset);
+            offset += chunk.byteLength;
+          }
+          const data = JSON.parse(
+            new TextDecoder("utf-8", { fatal: true, ignoreBOM: false }).decode(bytes)
+          );
+          if (!Array.isArray(data.pages) || !Array.isArray(data.articles) ||
+              data.pages.length > 1_000 || data.articles.length > 1_000 ||
+              !data.pages.every(safePagePath) || !data.articles.every(safePagePath)) {
+            throw new Error("Invalid manifest");
+          }
+          const nextPages = new Set(data.pages);
+          if (!nextPages.has("/brad-log/") ||
+              !data.articles.every(path => path.startsWith("/brad-log/posts/") && nextPages.has(path))) {
+            throw new Error("Invalid article manifest");
+          }
+          cache = {
+            expires: now() + 5 * MINUTE,
+            pages: nextPages,
+            articles: new Set(data.articles),
+            lastSuccess: now(),
+            remoteAvailable: true,
+          };
+        } catch {
+          // No arbitrary URL gets accepted after a failed or malformed fetch.
+          cache = { ...cache, expires: now() + 30_000, remoteAvailable: false };
+        }
+      })().finally(() => { pending = undefined; });
+    }
+    await pending;
+  }
+
+  async function lookup(value, isArticle) {
+    await refresh();
+    return (isArticle ? cache.articles : cache.pages).has(value);
+  }
+  lookup.status = async () => {
+    await refresh();
+    return {
+      status: cache.remoteAvailable ? "ok" : "degraded",
+      source: cache.remoteAvailable ? "published-manifest" : "bundled-fallback",
+      remoteAvailable: cache.remoteAvailable,
+      lastSuccessAt: cache.lastSuccess === null ? null : new Date(cache.lastSuccess).toISOString(),
+      remotePages: cache.pages.size,
+      remoteArticles: cache.articles.size,
+      bundledPages: pages.size,
+      bundledArticles: articles.size,
+    };
+  };
+  return lookup;
 }
 
 async function requirePage(value, isArticle = false, lookup) {
@@ -467,6 +502,11 @@ export function createWorker({ now = () => Date.now(), verifyFetch = fetch, mani
           return reply(request, { status: "configured" });
         }
         const time = now();
+        if (request.method === "GET" && url.pathname === "/health/manifest") {
+          await rateLimit(request, env, "stats", time);
+          const status = await lookup.status();
+          return reply(request, status, status.remoteAvailable ? 200 : 503);
+        }
         if (request.method === "POST" && url.pathname === "/v1/pulse") {
           requireOrigin(request);
           return reply(request, await pulse(request, env, await readJson(request), time, lookup));
