@@ -10,6 +10,10 @@ import { getSortedPosts } from "@/utils/getSortedPosts";
 import config from "@/config";
 const locale = Astro.currentLocale ?? config.site.lang;
 const posts = getSortedPosts(await getCollection("posts"));
+const domains = DOMAINS.map(domain => ({
+  domain,
+  count: posts.filter(post => post.data.category === domain.id).length,
+})).sort((a, b) => Number(b.count > 0) - Number(a.count > 0));
 ---
 
 <Layout
@@ -24,23 +28,11 @@ const posts = getSortedPosts(await getCollection("posts"));
       ><span aria-current="page">專業領域</span>
     </nav>
     <header class="collection-header">
-      <p class="eyebrow">EXPLORE BY FIELD</p><h1>專業領域</h1><p>
-        選擇想了解的方向，沿著每一次實作累積理解。<br />六個領域，持續整理中的 {
-          posts.length
-        } 篇筆記。
-      </p>
+      <h1>專業領域</h1>
+      <p>從你想了解的領域開始，查找相關的技術筆記。</p>
     </header>
-    <ul class="domain-grid">
-      {
-        DOMAINS.map(domain => (
-          <DomainCard
-            domain={domain}
-            count={
-              posts.filter(post => post.data.category === domain.id).length
-            }
-          />
-        ))
-      }
+    <ul class="domain-list">
+      {domains.map(({ domain, count }) => <DomainCard {domain} {count} />)}
     </ul>
     <aside class="collection-tip">
       <p>

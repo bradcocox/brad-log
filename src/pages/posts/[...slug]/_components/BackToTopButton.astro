@@ -65,7 +65,7 @@ const items = withToc ? buildTocTree(headings) : [];
     const button = fab?.querySelector<HTMLButtonElement>("button");
     const progress = fab?.querySelector<HTMLElement>(".post-fab-progress");
     const popover = document.getElementById("toc-popover");
-    const sideToc = document.querySelector<HTMLElement>(".toc-side > nav");
+    const inlineToc = document.querySelector(".toc-panel");
     const interactionArea = document.querySelector<HTMLElement>(
       "[data-article-engagement]"
     );
@@ -134,17 +134,14 @@ const items = withToc ? buildTocTree(headings) : [];
       } else {
         fab!.hidden = false;
       }
-      // CSS hides a side TOC with no room, but can't tell the button from there.
-      fab!.toggleAttribute("data-side-toc-hidden", sideToc?.offsetWidth === 0);
-      // A popover left open would outlive the button that closes it.
-      if (fab!.offsetWidth === 0) closePopover();
 
       const scrollTotal = root.scrollHeight - root.clientHeight;
       const ratio = scrollTotal > 0 ? root.scrollTop / scrollTotal : 0;
       progress!.style.setProperty("--progress", `${ratio * 100}%`);
 
-      // A TOC button is useful from the start; back to top only once scrolled.
-      const isVisible = !inInteractions && (opensToc || ratio > 0.3);
+      const passedToc = (inlineToc?.getBoundingClientRect().bottom ?? 0) <= 0;
+      const isVisible = !inInteractions && (opensToc ? passedToc : ratio > 0.3);
+      if (!isVisible) closePopover();
       if (isVisible !== lastVisible) {
         fab!.toggleAttribute("data-visible", isVisible);
         lastVisible = isVisible;
@@ -291,13 +288,6 @@ const items = withToc ? buildTocTree(headings) : [];
   /* Without popover support nothing would hide it (Safari before 17). */
   @supports not selector(:popover-open) {
     .toc-popover {
-      display: none;
-    }
-  }
-
-  /* The side TOC takes over from 90rem while it has room (PostToc.astro). */
-  @media (min-width: 90rem) {
-    .post-fab:has([data-has-toc]):not([data-side-toc-hidden]) {
       display: none;
     }
   }

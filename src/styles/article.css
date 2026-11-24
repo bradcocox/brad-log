@@ -1,10 +1,10 @@
-/* Article blocks share one starting edge; wider material stays in the main column. */
+/* Keep the article in one reading column, with scrollable code and tables. */
 .post-page {
-  --reading-width: 54rem;
+  --reading-width: 46rem;
   width: 100%;
-  max-width: 100rem;
+  max-width: calc(var(--reading-width) + 6rem);
   margin-inline: auto;
-  padding-inline: clamp(1.25rem, 3vw, 3rem);
+  padding-inline: clamp(1.25rem, 5vw, 3rem);
 }
 .post-primary {
   min-width: 0;
@@ -17,7 +17,20 @@
   margin-inline: 0 auto;
 }
 .post-header {
-  margin-bottom: 2.5rem;
+  margin-bottom: 2.25rem;
+}
+.post-title {
+  font-family: var(--font-editorial);
+  font-size: clamp(1.75rem, 3.9vw, 2.8rem);
+  font-weight: 700;
+  line-height: 1.27;
+  overflow-wrap: anywhere;
+}
+.code-block {
+  position: relative;
+}
+.post-primary > .page-stats {
+  margin-block: 2.5rem 1.5rem;
 }
 .post-prose {
   width: 100%;
@@ -26,9 +39,6 @@
 .post-prose > :not(.article-table) {
   max-width: var(--reading-width);
   margin-inline: 0 auto;
-}
-.post-prose > :is(pre, figure, .expressive-code, .code-block, p:has(> img)) {
-  max-width: 68rem;
 }
 .app-prose {
   line-height: 1.95;
@@ -69,7 +79,7 @@
   margin-bottom: 0.65rem;
 }
 .post-prose > p:has(> img) + p:has(> em:only-child) {
-  max-width: 68rem;
+  max-width: var(--reading-width);
   margin-top: 0;
   font-size: 0.94rem;
   color: var(--muted-foreground);

@@ -4,7 +4,7 @@ import { getRelativeLocaleUrl } from "astro:i18n";
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
-import Card from "@/components/Card.astro";
+import PostIndex from "@/components/PostIndex.astro";
 import DomainIcon from "@/components/DomainIcon.astro";
 import { DOMAINS, type Domain } from "@/data/domains";
 import { getSortedPosts } from "@/utils/getSortedPosts";
@@ -33,7 +33,6 @@ const posts = getSortedPosts(await getCollection("posts")).filter(
   <main
     id="main-content"
     class="wide-layout collection-main"
-    data-category-page
   >
     <nav class="breadcrumbs" aria-label="所在位置">
       <a href={getRelativeLocaleUrl(locale, "")}>首頁</a><span
@@ -67,23 +66,13 @@ const posts = getSortedPosts(await getCollection("posts")).filter(
         ))
       }
     </nav>
-    <div class="list-summary">
-      <p><strong>{posts.length}</strong> 篇筆記</p><span>依最近更新排序</span>
-    </div>
     {
       posts.length ? (
-        <ul class="post-grid">
-          {posts.map(post => (
-            <Card {...post} />
-          ))}
-        </ul>
+        <PostIndex {posts} category={domain.id} />
       ) : (
-        <section class="empty-state">
+        <section class="empty-state category-empty">
           <>
-            <span class="empty-icon" aria-hidden="true">
-              ＋
-            </span>
-            <h2>這個領域，從下一次學習開始。</h2>
+            <h2>這個領域的筆記正在籌備中。</h2>
             <p>目前尚未有公開筆記。內容會在完成整理後出現在這裡。</p>
             <a
               class="primary-button"
@@ -98,11 +87,3 @@ const posts = getSortedPosts(await getCollection("posts")).filter(
   </main>
   <Footer />
 </Layout>
-<script>
-  const saveCategory = () => {
-    if (document.querySelector("[data-category-page]"))
-      sessionStorage.setItem("backUrl", location.pathname);
-  };
-  saveCategory();
-  document.addEventListener("astro:page-load", saveCategory);
-</script>

@@ -3,6 +3,9 @@ title: "Modern Web Guidance 1.0 是什麼？讓 AI Coding Agent 不再只會寫�
 author: Brad
 pubDatetime: 2026-11-23T14:25:00+08:00
 featured: true
+featuredTitle: |-
+  Modern Web Guidance：
+  從工具介紹到 CLI 實作
 draft: false
 category: developer-tools
 contentType: reading
