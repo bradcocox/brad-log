@@ -7,11 +7,11 @@ import { getDomain, CONTENT_TYPE_LABELS, LEVEL_LABELS } from "@/data/domains";
 import config from "@/config";
 type Props = CollectionEntry<"posts"> & {
   variant?: "h2" | "h3";
-  prominent?: boolean;
+  editorial?: boolean;
 };
 const {
   variant: Heading = "h2",
-  prominent = false,
+  editorial = false,
   id,
   data,
   filePath,
@@ -29,8 +29,11 @@ const dateLabel = new Intl.DateTimeFormat("zh-TW", {
 ---
 
 <li
-  class:list={["post-card", { "post-card-prominent": prominent }]}
+  class:list={["post-card", { "post-card-editorial": editorial }]}
   data-post-card
+  data-post-search={editorial
+    ? [data.title, data.description, ...data.tags].join(" ")
+    : undefined}
   data-category={data.category}
   data-content-type={data.contentType}
   data-published={data.pubDatetime.valueOf()}
@@ -52,9 +55,12 @@ const dateLabel = new Intl.DateTimeFormat("zh-TW", {
   <p class="post-card-description">{data.description}</p>
   <div class="post-card-footer">
     <span
-      >{data.modDatetime ? "更新於" : "發佈於"}
+      ><span class="post-card-date-note"
+        >{data.modDatetime ? "更新於" : "發佈於"}</span
+      >
       <time datetime={updated.toISOString()}>{dateLabel}</time></span
     ><a href={url} aria-label={"閱讀筆記：" + data.title}
-      >閱讀筆記 <span aria-hidden="true">→</span></a>
+      >閱讀筆記 <span aria-hidden="true">→</span></a
+    >
   </div>
 </li>

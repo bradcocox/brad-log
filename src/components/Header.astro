@@ -11,9 +11,9 @@ import BrandLogo from "@/components/BrandLogo.astro";
 const locale = Astro.currentLocale ?? config.site.lang;
 const currentPath = stripLocale(stripBase(Astro.url.pathname), locale);
 const nav = [
-  { path: "posts", label: "所有文章" },
-  { path: "categories", label: "專業領域" },
-  { path: "about", label: "關於 Brad.log" },
+  { path: "posts", label: "文章" },
+  { path: "categories", label: "主題" },
+  { path: "about", label: "關於" },
 ];
 const isActive = (path: string) =>
   currentPath.split("/").filter(Boolean)[0] === path;
@@ -57,14 +57,28 @@ const isActive = (path: string) =>
     <div class="header-controls">
       {
         config.features.search !== false && (
-          <a
-            class="icon-button"
-            href={getRelativeLocaleUrl(locale, "search")}
-            aria-label="搜尋筆記"
-            title="搜尋筆記"
-          >
-            <IconSearch />
-          </a>
+          <>
+            <form
+              class="header-search"
+              data-astro-reload
+              action={getRelativeLocaleUrl(locale, "search")}
+              role="search"
+              aria-label="全站搜尋"
+            >
+              <button type="submit" aria-label="搜尋文章">
+                <IconSearch aria-hidden="true" />
+              </button>
+              <input type="search" name="q" aria-label="搜尋文章" placeholder="搜尋文章…" />
+            </form>
+            <a
+              class="icon-button mobile-search"
+              href={getRelativeLocaleUrl(locale, "search")}
+              aria-label="搜尋筆記"
+              title="搜尋筆記"
+            >
+              <IconSearch aria-hidden="true" />
+            </a>
+          </>
         )
       }
       {

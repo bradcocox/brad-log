@@ -1,31 +1,34 @@
 ---
 import { getCollection } from "astro:content";
 import { getRelativeLocaleUrl } from "astro:i18n";
+import IconArrowRight from "@/assets/icons/IconArrowRight.svg";
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 import Card from "@/components/Card.astro";
-import DomainCard from "@/components/DomainCard.astro";
 import { DOMAINS } from "@/data/domains";
 import { getSortedPosts } from "@/utils/getSortedPosts";
 import { getPostUrl } from "@/utils/getPostPaths";
 import config from "@/config";
+
 const locale = Astro.currentLocale ?? config.site.lang;
 const posts = getSortedPosts(await getCollection("posts"));
-const recent = posts.slice(0, config.posts.perIndex);
 const starter = posts.find(post => post.data.featured) ?? posts[0];
+const recent = posts
+  .filter(post => post.id !== starter?.id)
+  .slice(0, config.posts.perIndex);
+const startTopics = DOMAINS.filter(domain =>
+  posts.some(post => post.data.category === domain.id)
+).slice(0, 4);
 const homePath = getRelativeLocaleUrl(locale, "");
-const latestDate = posts[0]
-  ? (posts[0].data.modDatetime ?? posts[0].data.pubDatetime)
-  : undefined;
-const lastUpdated = latestDate
-  ? new Intl.DateTimeFormat("zh-TW", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      timeZone: config.site.timezone,
-    }).format(latestDate)
-  : "準備開始";
+const featuredDate =
+  starter && (starter.data.modDatetime ?? starter.data.pubDatetime);
+const dateFormat = new Intl.DateTimeFormat("zh-TW", {
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+  timeZone: config.site.timezone,
+});
 ---
 
 <Layout>
@@ -35,120 +38,97 @@ const lastUpdated = latestDate
     class="wide-layout home-main"
     data-home-path={homePath}
   >
-    <section class="home-intro" aria-labelledby="intro-title">
-      <div class="intro-copy">
-        <p class="eyebrow">
-          <span class="status-dot" aria-hidden="true"
-          ></span>一份持續累積的工程筆記
-        </p>
-        <h1 id="intro-title">
-          從學會一點，<br />到理解更多<span class="brand-dot">。</span>
-        </h1>
-        <p class="intro-description">
-          我是 Brad。這裡記錄技術學習、實作與排錯的過程。<br
-            class="desktop-break"
-          />把每一次嘗試，整理成下次用得上的知識。
-        </p>
-        <div class="intro-actions">
-          <a
-            class="primary-button"
-            href={starter
-              ? getPostUrl(starter.id, starter.filePath, locale)
-              : getRelativeLocaleUrl(locale, "posts")}
-            >從第一篇開始 <span aria-hidden="true">→</span></a
-          >
-          <a class="text-link" href="#domains"
-            >依專業領域探索 <span aria-hidden="true">↓</span></a
-          >
-        </div>
-      </div>
-      <aside class="notebook-summary" aria-label="筆記概況">
-        <div class="summary-top">
-          <span lang="en">THE LEARNING LOG</span><span
-            class="summary-symbol"
-            aria-hidden="true">↗</span>
-        </div>
-        <p class="summary-title">每一篇，都是前進的足跡。</p>
-        <dl class="summary-stats">
-          <div><dt>公開筆記</dt><dd>{posts.length}<span>篇</span></dd></div><div
-          >
-            <dt>探索領域</dt><dd>{DOMAINS.length}<span>個</span></dd>
-          </div>
-        </dl>
-        <div class="summary-updated">
-          <span>最近更新</span><span>{lastUpdated}</span>
-        </div>
-      </aside>
-    </section>
-    <section class="home-section" aria-labelledby="recent-title">
-      <div class="section-heading">
-        <div>
-          <p class="eyebrow">RECENT NOTES</p><h2 id="recent-title">
-            最近寫下的筆記
-          </h2>
-        </div><a class="text-link" href={getRelativeLocaleUrl(locale, "posts")}
-          >所有文章 <span aria-hidden="true">→</span></a>
-      </div>
+    <section class="featured-story" aria-labelledby="intro-title">
+      <p class="featured-kicker">這裡記錄技術學習、實作與排錯。</p>
       {
-        recent.length ? (
-          <ul class="post-grid">
-            {recent.map(post => (
-              <Card {...post} variant="h3" prominent={recent.length === 1} />
-            ))}
-          </ul>
+        starter && featuredDate ? (
+          <>
+            <h1 id="intro-title">
+              {starter.data.featuredTitle ?? starter.data.title}
+            </h1>
+            <p class="featured-description">{starter.data.description}</p>
+            <div class="featured-actions">
+              <a
+                class="primary-button"
+                href={getPostUrl(starter.id, starter.filePath, locale)}
+              >
+                開始閱讀 <IconArrowRight aria-hidden="true" />
+              </a>
+              <div class="featured-meta">
+                <span>{starter.data.tags.slice(0, 2).join(" · ")}</span>
+                <time datetime={featuredDate.toISOString()}>
+                  {dateFormat.format(featuredDate)}
+                </time>
+              </div>
+            </div>
+          </>
         ) : (
-          <div class="empty-state">
-            <>
-              <h3>第一篇筆記，正在路上。</h3>
-              <p>整理完成後，會從這裡開始記錄學習的足跡。</p>
-            </>
-          </div>
+          <h1 id="intro-title">從學會一點，到理解更多。</h1>
         )
       }
     </section>
-    <section id="domains" class="home-section" aria-labelledby="domains-title">
-      <div class="section-heading">
-        <div>
-          <p class="eyebrow">EXPLORE BY FIELD</p><h2 id="domains-title">
-            沿著領域，找到你的下一站
-          </h2><p class="section-description">
-            用專業領域整理知識，用技術標籤串起關聯。
-          </p>
-        </div><a
-          class="text-link"
-          href={getRelativeLocaleUrl(locale, "categories")}
-          >領域總覽 <span aria-hidden="true">→</span></a>
+    <section class="editorial-recent" aria-labelledby="recent-title">
+      <div class="editorial-section-heading">
+        <h2 id="recent-title">最新文章</h2>
+        <a class="text-link" href={getRelativeLocaleUrl(locale, "posts")}>
+          所有文章 <IconArrowRight aria-hidden="true" />
+        </a>
       </div>
-      <ul class="domain-grid">
-        {
-          DOMAINS.map(domain => (
-            <DomainCard
-              domain={domain}
-              count={
-                posts.filter(post => post.data.category === domain.id).length
-              }
-            />
-          ))
-        }
-      </ul>
+      {
+        recent.length > 0 ? (
+          <ul class="editorial-post-list">
+            {recent.map(post => (
+              <Card {...post} variant="h3" editorial />
+            ))}
+          </ul>
+        ) : (
+          <p class="editorial-list-note">
+            {starter ? "更多筆記正在整理中。" : "第一篇筆記正在整理中。"}
+          </p>
+        )
+      }
     </section>
-    <aside class="learning-note">
-      <span aria-hidden="true" class="learning-symbol">✳</span><div>
-        <h2>不必一次懂全部，先把今天學到的留下來。</h2><p>
-          筆記會隨著新的理解持續更新。從問題出發，記下做法，也記下背後的理由。
-        </p>
-      </div><a class="text-link" href={getRelativeLocaleUrl(locale, "about")}
-        >關於這裡 <span aria-hidden="true">→</span></a>
-    </aside>
+    {
+      startTopics.length > 0 && (
+        <aside class="editorial-topics" aria-labelledby="start-title">
+          <h2 id="start-title">從這裡開始</h2>
+          <ul>
+            {startTopics.map(domain => (
+              <li>
+                <a
+                  href={getRelativeLocaleUrl(locale, `categories/${domain.id}`)}
+                >
+                  <span>
+                    <strong>{domain.name}</strong>
+                    <span class="editorial-topic-description">
+                      {domain.description}
+                    </span>
+                  </span>
+                  <IconArrowRight aria-hidden="true" />
+                </a>
+              </li>
+            ))}
+          </ul>
+          <a
+            class="text-link"
+            href={getRelativeLocaleUrl(locale, "categories")}
+          >
+            所有領域 <IconArrowRight aria-hidden="true" />
+          </a>
+        </aside>
+      )
+    }
   </main>
   <Footer />
 </Layout>
+
 <script>
-  const saveHome = () => {
+  function saveHome() {
     const main = document.querySelector<HTMLElement>("[data-home-path]");
     if (main?.dataset.homePath)
       sessionStorage.setItem("backUrl", main.dataset.homePath);
-  };
+  }
+
   saveHome();
   document.addEventListener("astro:page-load", saveHome);
 </script>

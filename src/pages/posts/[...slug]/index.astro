@@ -132,7 +132,7 @@ const ogImage = ogImageUrl
         <header class="post-header">
           <h1
             style={{ viewTransitionName: toTransitionName(post.id) }}
-            class="text-foreground inline-block text-2xl leading-relaxed font-bold sm:text-3xl"
+            class="post-title"
             data-pagefind-meta="title"
           >
             {title}
@@ -169,7 +169,7 @@ const ogImage = ogImageUrl
             </span>
             <EditPost {hideEditPost} {post} class="max-sm:hidden" />
           </div>
-          <PageStats />
+          <PostToc headings={tocHeadings} />
         </header>
         <article
           id="article"
@@ -182,6 +182,7 @@ const ogImage = ogImageUrl
           <Content />
         </article>
         <ArticleTables />
+        <PageStats />
         <ArticleEngagement />
         <div class="post-end">
           <hr class="my-8 border-dashed" />
@@ -212,7 +213,6 @@ const ogImage = ogImageUrl
           <AdjacentPostNav {prevPost} {nextPost} />
         </div>
       </div>
-      <PostToc headings={tocHeadings} />
     </div>
   </main>
   <Footer showPageStats={false} />
@@ -279,7 +279,6 @@ const ogImage = ogImageUrl
       if (codeBlock.parentElement?.classList.contains("code-block")) continue;
       const wrapper = document.createElement("div");
       wrapper.className = "code-block";
-      wrapper.style.position = "relative";
 
       const computedStyle = getComputedStyle(codeBlock);
       const hasFileNameOffset =
@@ -291,15 +290,19 @@ const ogImage = ogImageUrl
 
       const copyButton = document.createElement("button");
       copyButton.className = `copy-code absolute end-3 ${topClass} rounded bg-muted border border-muted px-2 py-1 text-xs leading-4 text-foreground font-medium`;
-      copyButton.innerHTML = copyButtonLabel;
+      copyButton.type = "button";
+      copyButton.textContent = copyButtonLabel;
       codeBlock.setAttribute("tabindex", "0");
-      codeBlock.appendChild(copyButton);
+      codeBlock.parentNode?.insertBefore(wrapper, codeBlock);
+      wrapper.append(codeBlock, copyButton);
 
-      codeBlock?.parentNode?.insertBefore(wrapper, codeBlock);
-      wrapper.appendChild(codeBlock);
-
+      let resetLabel;
       copyButton.addEventListener("click", async () => {
         await copyCode(codeBlock, copyButton);
+        clearTimeout(resetLabel);
+        resetLabel = setTimeout(() => {
+          copyButton.textContent = copyButtonLabel;
+        }, 1500);
       });
     }
 
@@ -309,14 +312,10 @@ const ogImage = ogImageUrl
 
       try {
         await navigator.clipboard.writeText(text ?? "");
-        button.innerText = "已複製";
+        button.textContent = "已複製";
       } catch {
-        button.innerText = "請手動選取複製";
+        button.textContent = "請手動選取複製";
       }
-
-      setTimeout(() => {
-        button.innerText = copyButtonLabel;
-      }, 700);
     }
   }
   attachCopyButtons();

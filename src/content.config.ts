@@ -15,6 +15,7 @@ const posts = defineCollection({
       modDatetime: z.date().optional().nullable(),
       title: z.string(),
       featured: z.boolean().optional(),
+      featuredTitle: z.string().optional(),
       draft: z.boolean().optional(),
       category: z.enum(DOMAIN_IDS),
       contentType: z.enum(["tutorial", "note", "troubleshooting", "reading"]).default("note"),

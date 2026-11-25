@@ -1,8 +1,10 @@
 ---
 import { getRelativeLocaleUrl } from "astro:i18n";
+import IconArrowRight from "@/assets/icons/IconArrowRight.svg";
 import type { Domain } from "@/data/domains";
 import config from "@/config";
 import DomainIcon from "./DomainIcon.astro";
+
 interface Props {
   domain: Domain;
   count: number;
@@ -15,20 +17,13 @@ const locale = Astro.currentLocale ?? config.site.lang;
   <a
     class="domain-card"
     href={getRelativeLocaleUrl(locale, `categories/${domain.id}`)}
-    aria-label={`${domain.name}，${count} 篇筆記`}
   >
-    <div class="domain-card-top">
-      <span class="domain-icon"><DomainIcon domain={domain.id} /></span>
-      <span class:list={["domain-count", { "is-empty": count === 0 }]}
-        >{count} 篇</span
-      >
-    </div>
-    <h3>{domain.name}</h3>
-    <span class="domain-english" lang="en">{domain.english}</span>
-    <p>{domain.description}</p>
-    <span class="domain-card-action"
-      >{count > 0 ? "探索筆記" : "查看領域"}<span aria-hidden="true">↗</span
-      ></span
-    >
+    <span class="domain-icon"><DomainIcon domain={domain.id} /></span>
+    <span class="domain-card-copy">
+      <strong>{domain.name}</strong>
+      <span>{domain.description}</span>
+    </span>
+    <span class="domain-count">{count > 0 ? `${count} 篇` : "籌備中"}</span>
+    <IconArrowRight class="domain-card-arrow" aria-hidden="true" />
   </a>
 </li>
